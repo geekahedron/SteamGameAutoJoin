@@ -100,8 +100,8 @@ function JoinGameID_Real( gameid )
 }
 
 function embedFunction(s) {
-document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;)
-{2}([\s\S]*)}/,'$2');
+	console.log('Embedding ' + s);
+	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
 }
 
 embedFunction(GetCurrentGame);
