@@ -13,7 +13,7 @@
 function StartNewGame()
 {
 	var gameID = gameid2css.value;
-	JoinGameID_Real(gameID);
+	console.log('button pressed to launch ID' & gameID);
 }
 
 function CheckAndLeaveCurrentGame( callback )
