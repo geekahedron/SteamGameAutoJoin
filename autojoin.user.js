@@ -98,3 +98,4 @@ function JoinGameID_Real( gameid )
 		}
 	);
 }
+DisplayUI();
