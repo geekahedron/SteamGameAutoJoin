@@ -31,18 +31,19 @@ function GetCurrentGame()
 function DisplayUI()
 {
 	var game_div = document.getElementsByClassName('section_play')[0].children[0];
-	var play_div = document.getElementsByClassName('section_play')[0].children[1];
-	if (play_div.className = "current_game")
+	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+	if (play_div.innerHTML == "Resume Your Game")
 	{
 		var current = GetCurrentGame();
-		play_div.children[0].children[0].children[0].innerHTML = "Resume Your Game (" + current + ")";
+		play_div.innerHTML = "Resume Your Game (" + current + ")";
 	}
 	var sp = document.createElement("span");
 	sp.innerHTML = '<a onClick="javascript:AutoJoinGame()" class="main_btn"><span>Auto Join Game<span></a><input type=text id="autojoinid" name="autojoinid" class="main_btn" />';
 	game_div.appendChild(sp,game_div.children[0]);
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 }
-/*
+
+
 // https://gist.github.com/HandsomeMatt/477c2867cea18d80306f
 function CheckAndLeaveCurrentGame( callback )
 {
@@ -93,5 +94,4 @@ function AutoJoinGame()
 		JoinGameID_Real( gameid );
 	});
 }
-*/
 DisplayUI();
