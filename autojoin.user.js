@@ -16,8 +16,6 @@
 (function(w) {
 "use strict";
 
-var joining = false;
-
 function addGlobalStyle(css)
 {
 	var head, style;
