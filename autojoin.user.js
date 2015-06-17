@@ -13,6 +13,11 @@
 
 // http://greasemonkey.win-start.de/patterns/add-css.html
 
+(function(w) {
+    "use strict";
+
+
+
 function addGlobalStyle(css)
 {
 	var head, style;
@@ -110,3 +115,5 @@ embedFunction(AutoJoinGame);
 embedFunction(JoinGameID_Real);
 
 DisplayUI();
+
+}(window));
