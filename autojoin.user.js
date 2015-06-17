@@ -69,9 +69,9 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-function JoinGameID_Real( gameid )
+function JoinGameID_Real( gameid, count )
 {
-	console.log('Trying to join room ' + gameid);
+	console.log('Trying to join room ' + gameid + '(attempt ' + count +')');
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxjoingame/',
 		{ 'gameid' : gameid }
@@ -83,7 +83,7 @@ function JoinGameID_Real( gameid )
 			}
 
 			console.log('Failed to join room ' + gameid);
-			if (doCheck()) JoinGameID_Real( gameid );
+			if (doCheck() != false) JoinGameID_Real( gameid, count+1 );
 		}
 	).fail( function( jqXHR ) {
 			var responseJSON = jqXHR.responseText.evalJSON();
@@ -93,7 +93,7 @@ function JoinGameID_Real( gameid )
 				console.log('Failed to join room ' + gameid + ' - Full');
 			else
 				console.log('Failed to join room ' + gameid);
-			if (doCheck()) JoinGameID_Real( gameid );
+			if (doCheck() != false) JoinGameID_Real( gameid, count+1 );
 		}
 	);
 }
@@ -104,7 +104,7 @@ function AutoJoinGame()
 	var gameID = document.getElementById("autojoinid").value;
     console.log('Launching auto joing for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Real( gameID );
+		JoinGameID_Real( gameID, 1 );
 	});
 }
 
