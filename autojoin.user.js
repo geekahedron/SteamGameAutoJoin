@@ -44,7 +44,7 @@ function DisplayUI()
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 	
 }
-/*
+
 function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
@@ -60,7 +60,7 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-function AutoJoinGame(gameID)
+function AutoJoinGame()
 {
 	var gameID = document.getElementById("autojoinid").value;
 	CheckAndLeaveCurrentGame( function() {
