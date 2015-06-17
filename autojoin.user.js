@@ -52,10 +52,8 @@ function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
 	console.log('Current Game: ' + currentgame);
-
 	if (currentgame == 0)
 		return callback();
-
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxleavegame/',
 		{ 'gameid' : currentgame, 'sessionid' : g_sessionID }
