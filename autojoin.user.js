@@ -90,7 +90,7 @@ function AutoJoinGame()
 {
 	var gameID = document.getElementById("autojoinid").value;
 	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Real( gameID );
+		JoinGameID_Real( gameid );
 	});
 }
 
