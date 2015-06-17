@@ -6,6 +6,7 @@
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
 // @match	*://steamcommunity.com//minigame
+// @match	http://steamcommunity.com/minigame/*
 // @updateURL	https://github.com/geekahedron/SteamGameAutoJoin/raw/master/autojoin.user.js
 // @downloadURL	https://github.com/geekahedron/SteamGameAutoJoin/raw/master/autojoin.user.js
 // @grant	none
@@ -28,31 +29,33 @@ function addGlobalStyle(css)
 }
 
 function GetCurrentGame()
-{	
-	return JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+{
+    var gameID = 0;
+  	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
+    if (play_div.innerHTML.search("Resume Your Game") == 0)
+    {
+      gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+      console.log('Current game: ' + gameID);
+      play_div.innerHTML = "Resume Your Game (" + gameID + ")";
+    }
+    return gameID;
 }
 
 function DisplayUI()
 {
 	var game_div = document.getElementsByClassName('section_play')[0].children[0];
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-	if (play_div.innerHTML == "Resume Your Game")
-	{
-		var current = GetCurrentGame();
-		play_div.innerHTML = "Resume Your Game (" + current + ")";
-	}
-	var sp = document.createElement("span");
-	sp.innerHTML = '<a onClick="javascript:AutoJoinGame()" class="main_btn"><span>Auto Join Game<span></a><input type=text id="autojoinid" name="autojoinid" class="main_btn" />';
-	game_div.appendChild(sp,game_div.children[0]);
+	GetCurrentGame();
+	var sgaj_sp = document.createElement("span");
+	sgaj_sp.innerHTML = '<a onClick="javascript:AutoJoinGame()" class="main_btn"><span>Auto Join Game<span></a><input type=text id="autojoinid" name="autojoinid" class="main_btn" />';
+	game_div.appendChild(sgaj_sp,game_div.children[0]);
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 }
-
 
 // https://gist.github.com/HandsomeMatt/477c2867cea18d80306f
 function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
-	console.log('Current Game: ' + currentgame);
 	if (currentgame == 0)
 		return callback();
 	$J.post(
