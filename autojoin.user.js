@@ -14,9 +14,9 @@
 // http://greasemonkey.win-start.de/patterns/add-css.html
 
 (function(w) {
-    "use strict";
+"use strict";
 
-
+var joining = false;
 
 function addGlobalStyle(css)
 {
@@ -47,9 +47,9 @@ function DisplayUI()
 	sp.innerHTML = '<a onClick="javascript:AutoJoinGame()" class="main_btn"><span>Auto Join Game<span></a><input type=text id="autojoinid" name="autojoinid" class="main_btn" />';
 	game_div.appendChild(sp,game_div.children[0]);
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
-	
 }
 
+// https://gist.github.com/HandsomeMatt/477c2867cea18d80306f
 function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
@@ -64,55 +64,57 @@ function CheckAndLeaveCurrentGame( callback )
 	).done( function() { callback(); }
 	);
 }
-
-function AutoJoinGame()
-{
-	var gameID = document.getElementById("autojoinid").value;
-	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Real( gameID );
-	});
-}
-
 function JoinGameID_Real( gameid )
 {
 	console.log('Trying to join room ' + gameid);
-
+	
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxjoingame/',
 		{ 'gameid' : gameid }
 	).done( function( json ) {
-			if ( json.success == '1' )
-			{
-				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-				return;
-			}
-
-			console.log('Failed to join room ' + gameid);
-			JoinGameID_Real( gameid );
+		if ( json.success == '1' )
+		{
+			top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+			return;
 		}
+		
+		console.log('Failed to join room ' + gameid);
+		if (joining)
+		{
+			JoinGameID_Real( gameid );
+		} else {
+			console.log('User cancelled auto join');
+		}
+	}
 	).fail( function( jqXHR ) {
-			var responseJSON = jqXHR.responseText.evalJSON();
-			if ( responseJSON.success == '24' && responseJSON.errorMsg )
-				console.log( responseJSON.errorMsg );
-			else if ( responseJSON.success == '25' )
-				console.log('Failed to join room ' + gameid + ' - Full');
-			else
-				console.log('Failed to join room ' + gameid);
-
+		var responseJSON = jqXHR.responseText.evalJSON();
+		if ( responseJSON.success == '24' && responseJSON.errorMsg )
+			console.log( responseJSON.errorMsg );
+		else if ( responseJSON.success == '25' )
+			console.log('Failed to join room ' + gameid + ' - Full');
+		else
+			console.log('Failed to join room ' + gameid);
+		if (joining)
+		{
 			JoinGameID_Real( gameid );
+		} else {
+			console.log('User cancelled auto join');
 		}
-	);
+	});
 }
 
-function embedFunction(s) {
-	console.log('Embedding ' + s);
-	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
+function AutoJoinGame()
+{
+  if (joining)
+  {
+    joining = false;
+  } else {
+    var gameID = document.getElementById("autojoinid").value;
+    CheckAndLeaveCurrentGame( function() {
+      JoinGameID_Real( gameID );
+    });
+  }
 }
-
-embedFunction(GetCurrentGame);
-embedFunction(CheckAndLeaveCurrentGame);
-embedFunction(AutoJoinGame);
-embedFunction(JoinGameID_Real);
 
 DisplayUI();
 
