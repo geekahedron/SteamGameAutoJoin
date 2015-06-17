@@ -21,7 +21,7 @@ function addGlobalStyle(css)
 	sgaj_style = document.createElement('style');
 	sgaj_style.type = 'text/css';
 	sgaj_style.innerHTML = css;
-	head.appendChild(sgaj_style);
+	sgaj_head.appendChild(sgaj_style);
 }
 
 function GetCurrentGame()
@@ -60,7 +60,7 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-function AutoJoinGame(gameID)
+function AutoJoinGame()
 {
 	var sgaj_gameID = document.getElementById("autojoinid").value;
 	CheckAndLeaveCurrentGame( function() {
