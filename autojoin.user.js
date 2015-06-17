@@ -32,7 +32,7 @@ function GetCurrentGame()
 {
     var gameID = 0;
   	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-    if (play_div.innerHTML.search("Resume Your Game") == 0)
+    if (play_div.innerHTML.search("Resume Your Game") === 0)
     {
       gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
       console.log('Current game: ' + gameID);
@@ -56,7 +56,7 @@ function DisplayUI()
 function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
-	if (currentgame == 0)
+	if (currentgame === 0)
 		return callback();
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxleavegame/',
@@ -101,17 +101,6 @@ function AutoJoinGame()
 		JoinGameID_Real( gameid );
 	});
 }
-/*
-// Embed functions to be called directly from the UI
-function embedFunction(s) {
-document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;)
-{2}([\s\S]*)}/,'$2');
-}
 
-embedFunction(GetCurrentGame);
-embedFunction(CheckAndLeaveCurrentGame);
-embedFunction(AutoJoinGame);
-embedFunction(JoinGameID_Real);
-*/
 DisplayUI();
 }(window));
