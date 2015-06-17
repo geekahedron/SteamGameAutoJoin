@@ -101,7 +101,7 @@ function AutoJoinGame()
 		JoinGameID_Real( gameid );
 	});
 }
-
+/*
 // Embed functions to be called directly from the UI
 function embedFunction(s) {
 document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;)
@@ -112,6 +112,6 @@ embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
 embedFunction(AutoJoinGame);
 embedFunction(JoinGameID_Real);
-
+*/
 DisplayUI();
 }(window));
