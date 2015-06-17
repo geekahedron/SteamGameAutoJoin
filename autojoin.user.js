@@ -11,6 +11,10 @@
 // @grant	none
 // ==/UserScript==
 
+//NOTE: This REQUIRES the use of GreaseMonkey or TamperMonkey
+(function(w) {
+    "use strict";
+
 // http://greasemonkey.win-start.de/patterns/add-css.html
 function addGlobalStyle(css)
 {
@@ -95,3 +99,4 @@ function AutoJoinGame()
 	});
 }
 DisplayUI();
+}(window));
