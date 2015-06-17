@@ -12,10 +12,6 @@
 // ==/UserScript==
 
 // http://greasemonkey.win-start.de/patterns/add-css.html
-
-(function(w) {
-"use strict";
-
 function addGlobalStyle(css)
 {
 	var head, style;
@@ -99,5 +95,3 @@ function AutoJoinGame()
 }
 
 DisplayUI();
-
-}(window));
