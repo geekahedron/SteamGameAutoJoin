@@ -31,12 +31,16 @@ function addGlobalStyle(css)
 function GetCurrentGame()
 {
     var gameID = 0;
-  	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-    if (play_div.innerHTML.search("Resume Your Game") === 0)
+    var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+    if (play_div.innerHTML != "Play Now!")
     {
-      gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
-      console.log('Current game: ' + gameID);
-      play_div.innerHTML = "Resume Your Game (" + gameID + ")";
+        play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
+        if (play_div.innerHTML.search("Resume Your Game") == 0)
+        {
+            gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+            console.log('Current game: ' + gameID);
+            play_div.innerHTML = "Resume Your Game (" + gameID + ")";
+        }
     }
     return gameID;
 }
