@@ -62,56 +62,42 @@ function CheckAndLeaveCurrentGame( callback )
 	).done( function() { callback(); }
 	);
 }
+
 function JoinGameID_Real( gameid )
 {
 	console.log('Trying to join room ' + gameid);
-	
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxjoingame/',
 		{ 'gameid' : gameid }
 	).done( function( json ) {
-		if ( json.success == '1' )
-		{
-			top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-			return;
-		}
-		
-		console.log('Failed to join room ' + gameid);
-		if (joining)
-		{
-			JoinGameID_Real( gameid );
-		} else {
-			console.log('User cancelled auto join');
-		}
-	}
-	).fail( function( jqXHR ) {
-		var responseJSON = jqXHR.responseText.evalJSON();
-		if ( responseJSON.success == '24' && responseJSON.errorMsg )
-			console.log( responseJSON.errorMsg );
-		else if ( responseJSON.success == '25' )
-			console.log('Failed to join room ' + gameid + ' - Full');
-		else
+			if ( json.success == '1' )
+			{
+				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+				return;
+			}
+
 			console.log('Failed to join room ' + gameid);
-		if (joining)
-		{
 			JoinGameID_Real( gameid );
-		} else {
-			console.log('User cancelled auto join');
 		}
-	});
+	).fail( function( jqXHR ) {
+			var responseJSON = jqXHR.responseText.evalJSON();
+			if ( responseJSON.success == '24' && responseJSON.errorMsg )
+				console.log( responseJSON.errorMsg );
+			else if ( responseJSON.success == '25' )
+				console.log('Failed to join room ' + gameid + ' - Full');
+			else
+				console.log('Failed to join room ' + gameid);
+			JoinGameID_Real( gameid );
+		}
+	);
 }
 
 function AutoJoinGame()
 {
-  if (joining)
-  {
-    joining = false;
-  } else {
-    var gameID = document.getElementById("autojoinid").value;
-    CheckAndLeaveCurrentGame( function() {
-      JoinGameID_Real( gameID );
-    });
-  }
+	var gameID = document.getElementById("autojoinid").value;
+	CheckAndLeaveCurrentGame( function() {
+		JoinGameID_Real( gameID );
+	});
 }
 
 DisplayUI();
