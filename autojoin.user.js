@@ -51,7 +51,7 @@ function DisplayUI()
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 	GetCurrentGame();
 	var sgaj_sp = document.createElement("span");
-	sgaj_sp.innerHTML = '<a onClick="javascript:AutoJoinGame()" class="main_btn"><span>Auto Join Game<span></a><input type=text id="autojoinid" name="autojoinid" class="main_btn" />';
+    sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type=text id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
 	game_div.appendChild(sgaj_sp,game_div.children[0]);
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 }
@@ -83,7 +83,7 @@ function JoinGameID_Real( gameid )
 			}
 
 			console.log('Failed to join room ' + gameid);
-			JoinGameID_Real( gameid );
+			if (doCheck()) JoinGameID_Real( gameid );
 		}
 	).fail( function( jqXHR ) {
 			var responseJSON = jqXHR.responseText.evalJSON();
@@ -93,13 +93,14 @@ function JoinGameID_Real( gameid )
 				console.log('Failed to join room ' + gameid + ' - Full');
 			else
 				console.log('Failed to join room ' + gameid);
-			JoinGameID_Real( gameid );
+			if (doCheck()) JoinGameID_Real( gameid );
 		}
 	);
 }
 
 function AutoJoinGame()
 {
+    StartRunning();
 	var gameID = document.getElementById("autojoinid").value;
     console.log('Launching auto joing for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
@@ -112,9 +113,33 @@ function embedFunction(s) {
 	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
 }
 
+// Allow redefining of function to use as state variable
+function doCheck() { return false; }
+function StartRunning()
+{
+    function doCheck() { return true; }
+    function embedFunction(s) {
+        document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
+    }
+    embedFunction(doCheck);
+}
+function StopRunning()
+{
+    console.log('Execution stopped by user');
+    function doCheck() { return false; }
+    function embedFunction(s) {
+        document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
+    }
+    embedFunction(doCheck);
+}
+
+// embed other functions used by UI after loading
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
 embedFunction(AutoJoinGame);
+embedFunction(doCheck);
+embedFunction(StopRunning);
+embedFunction(StartRunning);
 embedFunction(JoinGameID_Real);
 
 DisplayUI();
