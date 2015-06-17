@@ -42,7 +42,7 @@ function DisplayUI()
 	game_div.appendChild(sp,game_div.children[0]);
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 }
-
+/*
 // https://gist.github.com/HandsomeMatt/477c2867cea18d80306f
 function CheckAndLeaveCurrentGame( callback )
 {
@@ -93,5 +93,5 @@ function AutoJoinGame()
 		JoinGameID_Real( gameid );
 	});
 }
-
+*/
 DisplayUI();
