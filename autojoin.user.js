@@ -97,10 +97,21 @@ function JoinGameID_Real( gameid )
 function AutoJoinGame()
 {
 	var gameID = document.getElementById("autojoinid").value;
+    console.log('Launching auto joing for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Real( gameid );
+		JoinGameID_Real( gameID );
 	});
 }
+
+// Embed functions to be called directly from the UI
+function embedFunction(s) {
+	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
+}
+
+embedFunction(GetCurrentGame);
+embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(AutoJoinGame);
+embedFunction(JoinGameID_Real);
 
 DisplayUI();
 }(window));
