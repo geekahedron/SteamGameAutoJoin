@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.7.7a
+// @version	1.8a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -32,19 +32,32 @@ function addGlobalStyle(css)
 
 function GetCurrentGame()
 {
-    var gameID = 0;
-    var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-    if (play_div.innerHTML != "Play Now!")
-    {
-        play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-        if (play_div.innerHTML.search("Resume Your Game") === 0)
-        {
-            gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
-            console.log('Current game: ' + gameID);
-            play_div.innerHTML = "Resume Your Game (" + gameID + ")";
-        }
-    }
-    return gameID;
+	var gameID = -1;
+	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+	if (play_div.tagName == "A") // Resume your game button
+	{
+		play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
+		if (play_div.innerHTML.search("Resume Your Game") === 0)
+		{
+			gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+			console.log('Current game: ' + gameID);
+			play_div.innerHTML = "Resume Your Game (" + gameID + ")";
+		}
+	}
+	else if (play_div.tagName == "SPAN")
+	{
+		if (play_div.innerHTML == "Play Now!")
+		{
+			console.log('No current game');
+			gameID = 0;
+		}
+		else if (play_div.innerHTML == "Sign in to play!")
+		{
+			console.log('Not signed in');
+			gameID = -1;
+		}
+	}
+	return gameID;
 }
 
 function DisplayUI()
@@ -53,7 +66,7 @@ function DisplayUI()
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 	GetCurrentGame();
 	var sgaj_sp = document.createElement("span");
-    sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
+	sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
 	game_div.appendChild(sgaj_sp,game_div.children[0]);
 	document.getElementById('autojoinid').focus();
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
