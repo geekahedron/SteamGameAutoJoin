@@ -74,7 +74,7 @@ function JoinGameID_Real( gameid )
 
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxjoingame/',
-		{ 'gameid' : gameid }
+		{ 'gameid' : gameid, 'sessionid' : g_sessionID }
 	).done( function( json ) {
 			if ( json.success == '1' )
 			{
