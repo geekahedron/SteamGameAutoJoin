@@ -72,10 +72,11 @@ function CheckAndLeaveCurrentGame( callback )
 function JoinGameHelper_Count( gameid, count )
 {
     if (doCheck() === false) {
-    	document.getElementByID("auto_btn").innerHTML = "Auto Join Game"
+    	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game"
         console.log('Execution stopped by user');
         return;
     }
+    console.log('Attempting to join game ' + gameid + ' (Attempt ' + count + ')');
     $J.post(
         'http://steamcommunity.com/minigame/ajaxjoingame/',
         { 'gameid' : gameid, 'sessionid' : g_sessionID }
@@ -126,7 +127,7 @@ function AutoJoinGame()
 {
     StartRunning();
     var gameID = document.getElementById("autojoinid").value;
-    document.getElementByID("auto_btn").innerHTML = "Running..."
+    document.getElementById("auto_btn").children[0].innerHTML = "Running..."
     console.log('Launching auto join for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
 		JoinGameHelper_Count( gameID, 1 );
