@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name	Steam Game AutoJoin
+// @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.3a
+// @version	1.4a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -72,6 +72,7 @@ function CheckAndLeaveCurrentGame( callback )
 function JoinGameHelper_Count( gameid, count )
 {
     if (doCheck() === false) {
+    	document.getElementByID("auto_btn").innerHTML = "Auto Join Game"
         console.log('Execution stopped by user');
         return;
     }
@@ -124,7 +125,8 @@ function JoinGameHelper_Count( gameid, count )
 function AutoJoinGame()
 {
     StartRunning();
-	var gameID = document.getElementById("autojoinid").value;
+    var gameID = document.getElementById("autojoinid").value;
+    document.getElementByID("auto_btn").innerHTML = "Running..."
     console.log('Launching auto join for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
 		JoinGameHelper_Count( gameID, 1 );
