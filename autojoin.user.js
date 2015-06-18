@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.0
+// @version	2.0.1
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -32,7 +32,7 @@ function addGlobalStyle(css)
 
 function GetCurrentGame()
 {
-	var gameID = -1;
+	var gameID = 0;
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 	if (play_div.tagName == "A") // Resume your game button
 	{
@@ -95,13 +95,12 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-
-
 function ResetUI()
 {
     	StopRunning();
     	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game"
-    	document.getElementById("autojoinid").value="enter ID here";
+    	document.getElementById("autojoinid").value = "";
+    	document.getElementById("autojoinid").focus();
 }
 
 function JoinGameHelper_Count( gameid, count )
