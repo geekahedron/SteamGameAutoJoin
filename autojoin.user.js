@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.5a
+// @version	1.6a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -68,11 +68,16 @@ function CheckAndLeaveCurrentGame( callback )
 	).done( function() { callback(); }
 	);
 }
+function ResetUI()
+{
+    	StopRunning();
+    	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game"
+}
 
 function JoinGameHelper_Count( gameid, count )
 {
     if (doCheck() === false) {
-    	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game"
+    	ResetUI();
         console.log('Execution stopped by user');
         return;
     }
@@ -102,23 +107,26 @@ function JoinGameHelper_Count( gameid, count )
             }
             else
             {
+            	ResetUI();
                 ShowAlertDialog( 'Error', responseJSON.errorMsg );
             }
         }
         else if ( responseJSON.success == '25' )
         {
-            console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
-            ShowAlertDialog( 'Error', 'There was a problem trying to join the game: it already has the maximum number of players.' );
+        	ResetUI();
+        	console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
+        	ShowAlertDialog( 'Error', 'There was a problem trying to join the game: it already has the maximum number of players.' );
         }
         else if ( responseJSON.success == '28' )
         {
-            console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-            ShowAlertDialog( 'Error', 'You have previously left this game. You cannot join this game again.' );
+        	ResetUI();
+        	console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+        	ShowAlertDialog( 'Error', 'You have previously left this game. You cannot join this game again.' );
         }
         else
         {
-            console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
-            JoinGameHelper_Count(gameid, count+1);
+        	console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+        	JoinGameHelper_Count(gameid, count+1);
         }
     });
 }
@@ -163,6 +171,7 @@ embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
 embedFunction(JoinGameHelper_Count);
 embedFunction(AutoJoinGame);
+embedFunction(ResetUI);
 embedFunction(doCheck);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
