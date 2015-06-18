@@ -69,31 +69,48 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-function JoinGameID_Real( gameid, count )
+function JoinGameID_Ajax(gameid, count)
 {
-	console.log('Trying to join room ' + gameid + '(attempt ' + count +')');
+	if (doCheck() == false) return;
+	console.log('Trying to join room ' + game id + '(attemt ' + count + ')');
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxjoingame/',
-		{ 'gameid' : gameid }
-	).done( function( json ) {
-			if ( json.success == '1' )
+		{ 'gameid' : gameid, 'sessionid' : g_sessionID }
+	).done(	function(json) {
+			if (json.success == '1')
 			{
 				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+			} else {
+				console.log('Failed to join game ' + gameid)
+				JoinGameID_Ajax(gameid, ++count);
 				return;
 			}
-
-			console.log('Failed to join room ' + gameid);
-			if (doCheck() != false) JoinGameID_Real( gameid, count+1 );
 		}
-	).fail( function( jqXHR ) {
+	).fail(	function(jqXHR) {
 			var responseJSON = jqXHR.responseText.evalJSON();
 			if ( responseJSON.success == '24' && responseJSON.errorMsg )
-				console.log( responseJSON.errorMsg );
+			{
+				console.log( 'Error joining game ' + gameid + ': ' + responseJSON.errorMsg );
+				JoinGameID_Ajax(gameid, ++count);
+				return;
+			}
 			else if ( responseJSON.success == '25' )
-				console.log('Failed to join room ' + gameid + ' - Full');
+			{
+				console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
+				JoinGameID_Ajax(gameid, ++count);
+				return;
+			}
+			else if ( responseJSON.success == '28' )
+			{
+				console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+				return;
+			}
 			else
-				console.log('Failed to join room ' + gameid);
-			if (doCheck() != false) JoinGameID_Real( gameid, count+1 );
+			{
+				console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+				JoinGameID_Ajax(gameid, ++count);
+				return;
+			}
 		}
 	);
 }
@@ -104,7 +121,7 @@ function AutoJoinGame()
 	var gameID = document.getElementById("autojoinid").value;
     console.log('Launching auto joing for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Real( gameID, 1 );
+		JoinGameID_Ajax( gameID, 1 );
 	});
 }
 
@@ -140,7 +157,7 @@ embedFunction(AutoJoinGame);
 embedFunction(doCheck);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
-embedFunction(JoinGameID_Real);
+embedFunction(JoinGameID_Ajax);
 
 DisplayUI();
 }(window));
