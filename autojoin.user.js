@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.0.2
+// @version	2.0.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -140,9 +140,15 @@ function JoinGameHelper_Count( gameid, count )
             }
             else if (msg.search("maximum number of players") != -1)
             {
-            	ResetUI();
             	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
-                ShowAlertDialog( 'Error joining ' + gameid, msg );
+            	// 2.0.3 try a few times on a full room, just for fun
+            	if (count < 5)
+            	{
+            		JoinGameHelper_Count(gameid, count+1);
+            	} else {
+            		ResetUI();
+            		ShowAlertDialog( 'Error joining ' + gameid, msg );
+            	}
             }
             else
             {
