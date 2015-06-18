@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.0.1
+// @version	2.0.2
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -136,13 +136,13 @@ function JoinGameHelper_Count( gameid, count )
             {
             	ResetUI();
             	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
-                ShowAlertDialog( 'Error', msg );
+                ShowAlertDialog( 'Error joining ' + gameid, msg );
             }
             else if (msg.search("maximum number of players") != -1)
             {
             	ResetUI();
             	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
-                ShowAlertDialog( 'Error', msg );
+                ShowAlertDialog( 'Error joining ' + gameid, msg );
             }
             else
             {
@@ -153,13 +153,13 @@ function JoinGameHelper_Count( gameid, count )
         {
         	ResetUI();
         	console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
-        	ShowAlertDialog( 'Error', 'There was a problem trying to join the game: it already has the maximum number of players.' );
+        	ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
         }
         else if ( responseJSON.success == '28' )
         {
         	ResetUI();
         	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-        	ShowAlertDialog( 'Error', 'You have previously left this game. You cannot join this game again.' );
+        	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
         }
         else
         {
