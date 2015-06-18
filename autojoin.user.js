@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.9a
+// @version	2.0
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -128,34 +128,43 @@ function JoinGameHelper_Count( gameid, count )
     }
     ).fail( function( jqXHR ) {
         var responseJSON = jqXHR.responseText.evalJSON();
-        if ( responseJSON.success == '24' && responseJSON.errorMsg )
+        var code = responseJSON.success;
+        var msg = responseJSON.errorMsg;
+        if ( code == '24' && msg )
         {
-            console.log( 'Error joining game ' + gameid + ': ' + responseJSON.errorMsg );
-            if (responseJSON.errorMsg.search("higher than the highest level you have completed") == -1)
+            console.log( code + ' Error joining game ' + gameid + ': ' + msg );
+            if (msg.search("higher than the highest level you have completed") != -1)
             {
-                JoinGameHelper_Count(gameid, count+1);
+            	ResetUI();
+            	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
+                ShowAlertDialog( 'Error', msg );
+            }
+            else if (msg.search("maximum number of players") != -1)
+            {
+            	ResetUI();
+            	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
+                ShowAlertDialog( 'Error', msg );
             }
             else
             {
-            	ResetUI();
-                ShowAlertDialog( 'Error', responseJSON.errorMsg );
+                JoinGameHelper_Count(gameid, count+1);
             }
         }
-        else if ( responseJSON.success == '25' )
+        else if ( code == '25' )
         {
         	ResetUI();
-        	console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
+        	console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
         	ShowAlertDialog( 'Error', 'There was a problem trying to join the game: it already has the maximum number of players.' );
         }
         else if ( responseJSON.success == '28' )
         {
         	ResetUI();
-        	console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+        	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
         	ShowAlertDialog( 'Error', 'You have previously left this game. You cannot join this game again.' );
         }
         else
         {
-        	console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+        	console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
         	JoinGameHelper_Count(gameid, count+1);
         }
     });
