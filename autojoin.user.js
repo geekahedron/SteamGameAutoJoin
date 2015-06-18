@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.0.3
+// @version	2.1
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -47,7 +47,7 @@ function GetCurrentGame()
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
 		gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
 		console.log('Current game: ' + gameID);
-		play_div.innerHTML = btn_text + '(' + gameID + ')';
+		play_div.innerHTML = btn_text + ' (' + gameID + ')';
 	}
 	else if (play_div.tagName == "SPAN")
 	{
@@ -155,18 +155,27 @@ function JoinGameHelper_Count( gameid, count )
                 JoinGameHelper_Count(gameid, count+1);
             }
         }
-        else if ( code == '25' )
+        else if ( code == '25' )	// room full
         {
         	ResetUI();
         	console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
         	ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
         }
-        else if ( responseJSON.success == '28' )
+        else if ( responseJSON.success == '28' )	// previously quit room
         {
         	ResetUI();
         	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
         	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
         }
+        else if ( responseJSON.success == '29' )	// currently in room
+        {
+        	ResetUI();
+        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
+        	CheckAndLeaveCurrentGame( function() {
+        		JoinGameHelper_Count( gameid, count+1 );
+        	});
+        }
+
         else
         {
         	console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
@@ -178,12 +187,10 @@ function JoinGameHelper_Count( gameid, count )
 function AutoJoinGame()
 {
     StartRunning();
-    var gameID = document.getElementById("autojoinid").value;
+    var gameid = document.getElementById("autojoinid").value;
     document.getElementById("auto_btn").children[0].innerHTML = "Running..."
-    console.log('Launching auto join for room: ' + gameID);
-	CheckAndLeaveCurrentGame( function() {
-		JoinGameHelper_Count( gameID, 1 );
-	});
+    console.log('Launching auto join for room: ' + gameid);
+    JoinGameHelper_Count(gameid, 1);
 }
 
 // Allow redefining of function to use as state variable
