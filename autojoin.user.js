@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.8a
+// @version	1.9a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -37,12 +37,17 @@ function GetCurrentGame()
 	if (play_div.tagName == "A") // Resume your game button
 	{
 		play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-		if (play_div.innerHTML.search("Resume Your Game") === 0)
-		{
-			gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
-			console.log('Current game: ' + gameID);
-			play_div.innerHTML = "Resume Your Game (" + gameID + ")";
-		}
+
+//! 1.9 removed the hardcoded text check to allow for other languages
+//		if (play_div.innerHTML.search("Resume Your Game") != 0) {
+
+// check to see if we've already posted the room number
+		var paren_pos = play_div.innerHTML.search('[(]');
+		var btn_text = play_div.innerHTML;
+		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
+		gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+		console.log('Current game: ' + gameID);
+		play_div.innerHTML = btn_text + '(' + gameID + ')';
 	}
 	else if (play_div.tagName == "SPAN")
 	{
@@ -62,15 +67,19 @@ function GetCurrentGame()
 
 function DisplayUI()
 {
-	var game_div = document.getElementsByClassName('section_play')[0].children[0];
-	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-	GetCurrentGame();
-	var sgaj_sp = document.createElement("span");
-	sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
-	game_div.appendChild(sgaj_sp,game_div.children[0]);
-	document.getElementById('autojoinid').focus();
-	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
-	addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
+	if (GetCurrentGame() >= 0)
+	{
+		var game_div = document.getElementsByClassName('section_play')[0].children[0];
+		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+		GetCurrentGame();
+		var sgaj_sp = document.createElement("span");
+		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
+		game_div.appendChild(sgaj_sp,game_div.children[0]);
+		document.getElementById('autojoinid').focus();
+		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
+		addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
+	}
+	// TODO: Add UI features for users not logged in
 }
 
 // Thanks to HandsomeMatt for the callback version of this function
