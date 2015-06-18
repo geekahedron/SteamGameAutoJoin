@@ -35,7 +35,7 @@ function GetCurrentGame()
     if (play_div.innerHTML != "Play Now!")
     {
         play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-        if (play_div.innerHTML.search("Resume Your Game") == 0)
+        if (play_div.innerHTML.search("Resume Your Game") === 0)
         {
             gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
             console.log('Current game: ' + gameID);
@@ -56,7 +56,7 @@ function DisplayUI()
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 }
 
-// https://gist.github.com/HandsomeMatt/477c2867cea18d80306f
+// Thanks to HandsomeMatt for the callback version of this function
 function CheckAndLeaveCurrentGame( callback )
 {
 	var currentgame = GetCurrentGame();
@@ -69,59 +69,65 @@ function CheckAndLeaveCurrentGame( callback )
 	);
 }
 
-function JoinGameID_Ajax(gameid, count)
+function JoinGameHelper_Count( gameid, count )
 {
-	if (doCheck() == false) return;
-	console.log('Trying to join room ' + game id + '(attemt ' + count + ')');
-	$J.post(
-		'http://steamcommunity.com/minigame/ajaxjoingame/',
-		{ 'gameid' : gameid, 'sessionid' : g_sessionID }
-	).done(	function(json) {
-			if (json.success == '1')
-			{
-				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-			} else {
-				console.log('Failed to join game ' + gameid)
-				JoinGameID_Ajax(gameid, ++count);
-				return;
-			}
-		}
-	).fail(	function(jqXHR) {
-			var responseJSON = jqXHR.responseText.evalJSON();
-			if ( responseJSON.success == '24' && responseJSON.errorMsg )
-			{
-				console.log( 'Error joining game ' + gameid + ': ' + responseJSON.errorMsg );
-				JoinGameID_Ajax(gameid, ++count);
-				return;
-			}
-			else if ( responseJSON.success == '25' )
-			{
-				console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
-				JoinGameID_Ajax(gameid, ++count);
-				return;
-			}
-			else if ( responseJSON.success == '28' )
-			{
-				console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-				return;
-			}
-			else
-			{
-				console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
-				JoinGameID_Ajax(gameid, ++count);
-				return;
-			}
-		}
-	);
+    if (doCheck() === false) {
+        console.log('Execution stopped by user');
+        return;
+    }
+    $J.post(
+        'http://steamcommunity.com/minigame/ajaxjoingame/',
+        { 'gameid' : gameid, 'sessionid' : g_sessionID }
+    ).done( function( json ) {
+        if ( json.success == '1' )
+        {
+            top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+        }
+        else
+        {
+            console.log('Failed to join game ' + gameid);
+            JoinGameHelper_Count(gameid, count+1);
+        }
+    }
+    ).fail( function( jqXHR ) {
+        var responseJSON = jqXHR.responseText.evalJSON();
+        if ( responseJSON.success == '24' && responseJSON.errorMsg )
+        {
+            console.log( 'Error joining game ' + gameid + ': ' + responseJSON.errorMsg );
+            if (responseJSON.errorMsg.search("higher than the highest level you have completed") == -1)
+            {
+                JoinGameHelper_Count(gameid, count+1);
+            }
+            else
+            {
+                ShowAlertDialog( 'Error', responseJSON.errorMsg );
+            }
+        }
+        else if ( responseJSON.success == '25' )
+        {
+            console.log('Error joining game ' + gameid + ': it already has the maximum number of players.' );
+            ShowAlertDialog( 'Error', 'There was a problem trying to join the game: it already has the maximum number of players.' );
+        }
+        else if ( responseJSON.success == '28' )
+        {
+            console.log('Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+            ShowAlertDialog( 'Error', 'You have previously left this game. You cannot join this game again.' );
+        }
+        else
+        {
+            console.log('Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+            JoinGameHelper_Count(gameid, count+1);
+        }
+    });
 }
 
 function AutoJoinGame()
 {
     StartRunning();
 	var gameID = document.getElementById("autojoinid").value;
-    console.log('Launching auto joing for room: ' + gameID);
+    console.log('Launching auto join for room: ' + gameID);
 	CheckAndLeaveCurrentGame( function() {
-		JoinGameID_Ajax( gameID, 1 );
+		JoinGameHelper_Count( gameID, 1 );
 	});
 }
 
@@ -142,7 +148,6 @@ function StartRunning()
 }
 function StopRunning()
 {
-    console.log('Execution stopped by user');
     function doCheck() { return false; }
     function embedFunction(s) {
         document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
@@ -153,11 +158,11 @@ function StopRunning()
 // embed other functions used by UI after loading
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(JoinGameHelper_Count);
 embedFunction(AutoJoinGame);
 embedFunction(doCheck);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
-embedFunction(JoinGameID_Ajax);
 
 DisplayUI();
 }(window));
