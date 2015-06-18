@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.7.5a
+// @version	1.7.6a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -51,8 +51,9 @@ function DisplayUI()
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 	GetCurrentGame();
 	var sgaj_sp = document.createElement("span");
-    sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" default="enter ID here" value="enter ID here" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
+    sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
 	game_div.appendChild(sgaj_sp,game_div.children[0]);
+	document.getElementById('autojoinid').focus();
 	addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 	addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
 }
