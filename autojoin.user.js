@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.7.6a
+// @version	1.7.7a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
 // @match	*://steamcommunity.com//minigame
-// @match	http://steamcommunity.com/minigame/*
+// @match	http://steamcommunity.com/minigame/
 // @updateURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
 // @downloadURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
 // @grant	none
@@ -15,6 +15,8 @@
 //NOTE: This REQUIRES the use of GreaseMonkey or TamperMonkey
 (function(w) {
     "use strict";
+
+//*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) START COPYING HERE ***//
 
 // http://greasemonkey.win-start.de/patterns/add-css.html
 function addGlobalStyle(css)
@@ -148,11 +150,6 @@ function AutoJoinGame()
 	});
 }
 
-// Embed functions to be called directly from the UI
-function embedFunction(s) {
-	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
-}
-
 // Allow redefining of function to use as state variable
 function doCheck() { return false; }
 function StartRunning()
@@ -171,6 +168,15 @@ function StopRunning()
     }
     embedFunction(doCheck);
 }
+DisplayUI();
+
+//*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) STOP COPYING HERE ***//
+
+
+// Embed functions to be called directly from the UI
+function embedFunction(s) {
+	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
+}
 
 // embed other functions used by UI after loading
 embedFunction(GetCurrentGame);
@@ -182,5 +188,4 @@ embedFunction(doCheck);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
 
-DisplayUI();
 }(window));
