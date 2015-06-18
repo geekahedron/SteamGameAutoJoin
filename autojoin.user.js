@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	1.6a
+// @version	1.7a
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
 // @match	*://steamcommunity.com//minigame
 // @match	http://steamcommunity.com/minigame/*
-// @updateURL	https://github.com/geekahedron/SteamGameAutoJoin/raw/master/autojoin.user.js
-// @downloadURL	https://github.com/geekahedron/SteamGameAutoJoin/raw/master/autojoin.user.js
+// @updateURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
+// @downloadURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
 // @grant	none
 // ==/UserScript==
 
