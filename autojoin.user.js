@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.6.1
+// @version	2.6.2
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -244,7 +244,7 @@ function MakeCheckBox(name, desc, state, listener)
 	checkbox.checked = state;
 	checkbox.onclick = listener;
 	
-	label.classname = "checklabel";
+	label.className = "checklabel";
 
 	label.appendChild(checkbox);
 	label.appendChild(description);
