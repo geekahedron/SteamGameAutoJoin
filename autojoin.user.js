@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.2
+// @version	2.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -32,7 +32,7 @@ function addGlobalStyle(css)
 
 function GetCurrentGame()
 {
-	var gameID = 0;
+	var gameid = 0;
 	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 	if (play_div.tagName == "A") // Resume your game button
 	{
@@ -45,11 +45,11 @@ function GetCurrentGame()
 		var paren_pos = play_div.innerHTML.search('[(]');
 		var btn_text = play_div.innerHTML;
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
-		gameID = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
-		console.log('Current game: ' + gameID);
-		play_div.innerHTML = btn_text + ' (' + gameID + ')';
+		gameid = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+		console.log('Current game: ' + gameid);
+		play_div.innerHTML = btn_text + ' (' + gameid + ')';
 	}
-	else if (play_div.tagName == "SPAN")
+	else if (play_div.tagName == "SPAN")	// no game or not logged in
 	{
 		if (play_div.innerHTML == "Play Now!")
 		{
@@ -62,7 +62,7 @@ function GetCurrentGame()
 			gameID = -1;
 		}
 	}
-	return gameID;
+	return gameid;
 }
 
 function DisplayUI()
@@ -79,6 +79,16 @@ function DisplayUI()
 		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 		addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
 	}
+	
+/*	var play_box = document.querySelector(".section_play");
+	
+	var options1 = document.createElement("div");
+	options1.className = "options_column";
+
+	options1.appendChild(makeCheckBox("tryFullRooms", "Continue when room is full", tryFullRooms, toggleFullRooms, false));
+
+	info_box.appendChild(options1);
+	*/
 	// TODO: Add UI features for users not logged in
 }
 
@@ -103,9 +113,66 @@ function ResetUI()
     	document.getElementById("autojoinid").focus();
 }
 
+function HandleJoinError(gameid, count, code, msg)
+{
+	switch(code)
+	{
+		case 25:	// room full
+			ResetUI();
+			console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
+			ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
+			break;
+		case 28:	// previously quit room
+			ResetUI();
+        	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+        	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
+			break;
+		case 29:	// currently in a room
+        	ResetUI();
+        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
+        	CheckAndLeaveCurrentGame( function() {
+        		JoinGameHelper_Count( gameid, count+1 );
+			});
+			break;
+		case 24:
+			if (msg)
+			{
+				console.log( code + ' Error joining game ' + gameid + ': ' + msg );
+				if (msg.search("higher than the highest level you have completed") != -1)
+				{
+					ResetUI();
+					ShowAlertDialog( 'Error joining ' + gameid, msg );
+				}
+				else if (msg.search("maximum number of players") != -1)
+				{
+					// 2.0.3 try a few times on a full room, just for fun
+					if (count < 5)
+					{
+						JoinGameHelper_Count(gameid, count+1);
+					} else {
+						ResetUI();
+						ShowAlertDialog( 'Error joining ' + gameid, msg );
+					}
+				}
+				else
+				{
+					CheckAndLeaveCurrentGame( function() {
+						JoinGameHelper_Count( gameid, count+1 );
+					});
+				}
+				break;
+			}	// if there is no message, assume the worst and cascade to default response
+		default:
+			console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+			CheckAndLeaveCurrentGame( function() {
+				JoinGameHelper_Count( gameid, count+1 );
+			});
+	}
+}
+
 function JoinGameHelper_Count( gameid, count )
 {
-    if (doCheck() === false) {
+    if (getPreference("keepRunning", false) === false) {
     	ResetUI();
         console.log('Execution stopped by user');
         return;
@@ -127,64 +194,7 @@ function JoinGameHelper_Count( gameid, count )
     }
     ).fail( function( jqXHR ) {
         var responseJSON = jqXHR.responseText.evalJSON();
-        var code = responseJSON.success;
-        var msg = responseJSON.errorMsg;
-        if ( code == '24' && msg )
-        {
-            console.log( code + ' Error joining game ' + gameid + ': ' + msg );
-            if (msg.search("higher than the highest level you have completed") != -1)
-            {
-            	ResetUI();
-            	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
-                ShowAlertDialog( 'Error joining ' + gameid, msg );
-            }
-            else if (msg.search("maximum number of players") != -1)
-            {
-            	console.log( code + ' Error joining game ' + gameid + ': ' + msg);
-            	// 2.0.3 try a few times on a full room, just for fun
-            	if (count < 5)
-            	{
-            		JoinGameHelper_Count(gameid, count+1);
-            	} else {
-            		ResetUI();
-            		ShowAlertDialog( 'Error joining ' + gameid, msg );
-            	}
-            }
-            else
-            {
-        	CheckAndLeaveCurrentGame( function() {
-        		JoinGameHelper_Count( gameid, count+1 );
-        	});
-            }
-        }
-        else if ( code == '25' )	// room full
-        {
-        	ResetUI();
-        	console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
-        	ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
-        }
-        else if ( responseJSON.success == '28' )	// previously quit room
-        {
-        	ResetUI();
-        	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-        	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
-        }
-        else if ( responseJSON.success == '29' )	// currently in room
-        {
-        	ResetUI();
-        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
-        	CheckAndLeaveCurrentGame( function() {
-        		JoinGameHelper_Count( gameid, count+1 );
-        	});
-        }
-
-        else
-        {
-        	console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
-        	CheckAndLeaveCurrentGame( function() {
-        		JoinGameHelper_Count( gameid, count+1 );
-        	});
-        }
+        HandleJoinError(gameid, count, responseJSON.success, responseJSON.errorMsg)
     });
 }
 
@@ -192,28 +202,53 @@ function AutoJoinGame()
 {
     StartRunning();
     var gameid = document.getElementById("autojoinid").value;
-    document.getElementById("auto_btn").children[0].innerHTML = "Running..."
-    console.log('Launching auto join for room: ' + gameid);
-    JoinGameHelper_Count(gameid, 1);
+	if (gameid)
+	{
+		document.getElementById("auto_btn").children[0].innerHTML = "Running..."
+		console.log('Launching auto join for room: ' + gameid);
+		JoinGameHelper_Count(gameid, 1);
+	} else {
+		console.log('No room ID specified for auto join');
+	}
 }
 
+function setPreference(key, value) {
+	try {
+		if(localStorage !== 'undefined') {
+			localStorage.setItem('steamdb-minigame-wormholers/' + key, value);
+		}
+	} catch (e) {
+		console.log(e); // silently ignore error
+	}
+}
+
+function getPreference(key, defaultValue) {
+	try {
+		if(localStorage !== 'undefined') {
+			var result = localStorage.getItem('steamdb-minigame-wormholers/' + key);
+			return (result !== null ? result : defaultValue);
+		}
+	} catch (e) {
+		console.log(e); // silently ignore error
+		return defaultValue;
+	}
+}
+
+function getPreferenceBoolean(key, defaultValue) {
+	return (getPreference(key, defaultValue.toString()) == "true");
+}
+
+
+
 // Allow redefining of function to use as state variable
-function doCheck() { return false; }
+setPreference("keepRunning", false);
 function StartRunning()
 {
-    function doCheck() { return true; }
-    function embedFunction(s) {
-        document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
-    }
-    embedFunction(doCheck);
+	setPreference("keepRunning", true);
 }
 function StopRunning()
 {
-    function doCheck() { return false; }
-    function embedFunction(s) {
-        document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
-    }
-    embedFunction(doCheck);
+	setPreference("keepRunning", false);
 }
 DisplayUI();
 
@@ -228,11 +263,14 @@ function embedFunction(s) {
 // embed other functions used by UI after loading
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(HandleJoinError);
 embedFunction(JoinGameHelper_Count);
 embedFunction(AutoJoinGame);
 embedFunction(ResetUI);
-embedFunction(doCheck);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
+embedFunction(setPreference);
+embedFunction(getPreference);
+embedFunction(getPreferenceBoolean);
 
 }(window));
