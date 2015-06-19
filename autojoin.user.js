@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.5.2
+// @version	2.5.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -200,6 +200,7 @@ function DisplayUI()
 	options1.className = "options_column";
 	
 	options1.appendChild(MakeCheckBox("tryFullRooms", "Continue when room is full", false, toggleFullRooms));
+	setPreference("tryFullRooms", false);
 
 	game_div.appendChild(options1);
 
@@ -222,7 +223,7 @@ function toggleFullRooms(event)
 {
 	var value = getPreferenceBoolean("tryFullRooms", false);
 	
-	setPreferenceBoolean("tryFullRooms", !value);
+	setPreference("tryFullRooms", !value);
 }
 
 function MakeCheckBox(name, desc, state, listener)
