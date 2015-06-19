@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.5.6
+// @version	2.5.7
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -20,7 +20,7 @@
 //*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) START COPYING HERE ***//
 //**********************************************************************//
 
-functiong GetCurrentGameId()
+function GetCurrentGameId()
 {
 	return JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
 }
