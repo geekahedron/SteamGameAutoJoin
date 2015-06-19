@@ -152,7 +152,9 @@ function JoinGameHelper_Count( gameid, count )
             }
             else
             {
-                JoinGameHelper_Count(gameid, count+1);
+        	CheckAndLeaveCurrentGame( function() {
+        		JoinGameHelper_Count( gameid, count+1 );
+        	});
             }
         }
         else if ( code == '25' )	// room full
@@ -179,7 +181,9 @@ function JoinGameHelper_Count( gameid, count )
         else
         {
         	console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
-        	JoinGameHelper_Count(gameid, count+1);
+        	CheckAndLeaveCurrentGame( function() {
+        		JoinGameHelper_Count( gameid, count+1 );
+        	});
         }
     });
 }
