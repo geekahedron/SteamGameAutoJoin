@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.8
+// @version	3.0.0
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -74,7 +74,7 @@ function ResetUI()
     	document.getElementById("autojoinid").focus();
 }
 
-function HandleJoinError(gameid, count, code, msg)
+function HandleJoinError(rooms, gameid, count, code, msg)
 {
 	switch(code)
 	{
@@ -90,8 +90,8 @@ function HandleJoinError(gameid, count, code, msg)
 			break;
 		case 28:	// previously quit room
 			ResetUI();
-        	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-        	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
+			console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+			ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
 			break;
 //		case 29:	// currently in a room
 //        	ResetUI();
@@ -135,32 +135,44 @@ function HandleJoinError(gameid, count, code, msg)
 	}
 }
 
-function JoinGameHelper_Count( gameid, count )
+function JoinGameHelper_Count( rooms, count )
 {
-    if (getPreferenceBoolean("keepRunning", false) === false) {
-    	ResetUI();
-        console.log('Execution stopped by user');
-        return;
-    }
-    console.log('Attempting to join game ' + gameid + ' (Attempt ' + count + ')');
-    $J.post(
-        'http://steamcommunity.com/minigame/ajaxjoingame/',
-        { 'gameid' : gameid, 'sessionid' : g_sessionID }
-    ).done( function( json ) {
-        if ( json.success == '1' )
-        {
-            top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-        }
-        else
-        {
-            console.log('Failed to join game ' + gameid);
-            JoinGameHelper_Count(gameid, count+1);
-        }
-    }
-    ).fail( function( jqXHR ) {
-        var responseJSON = jqXHR.responseText.evalJSON();
-        HandleJoinError(gameid, count, responseJSON.success, responseJSON.errorMsg)
-    });
+	if (!rooms || rooms.length === 0)
+	{
+		ResetUI();
+		console.log('Out of rooms!');
+		return;
+	}
+	if (getPreferenceBoolean("keepRunning", false) === false) {
+		ResetUI();
+		console.log('Execution stopped by user');
+		return;
+	}
+	if (!count) count = 1;
+
+	var gameid = rooms.pop();
+	rooms.unshift(gameid);
+	
+	console.log('Attempting to join game ' + gameid + ' (Attempt ' + count + ')');
+	$J.post(
+		'http://steamcommunity.com/minigame/ajaxjoingame/',
+		{ 'gameid' : gameid, 'sessionid' : g_sessionID }
+	).done( function( json ) {
+		if ( json.success == '1' )
+		{
+			top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+		}
+		else
+		{
+			console.log('Failed to join game ' + gameid);
+			JoinGameHelper_Count(rooms, count+1);
+		}
+	}
+	).fail( function( jqXHR ) {
+			var responseJSON = jqXHR.responseText.evalJSON();
+			HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
+		}
+	);
 }
 
 function AutoJoinGame()
@@ -169,9 +181,10 @@ function AutoJoinGame()
     var gameid = document.getElementById("autojoinid").value;
 	if (gameid)
 	{
+		var rooms = gameid.split(',');
 		document.getElementById("auto_btn").children[0].innerHTML = "Running..."
-		console.log('Launching auto join for room: ' + gameid);
-		JoinGameHelper_Count(gameid, 1);
+		console.log('Launching auto join for room(s): ' + gameid);
+		JoinGameHelper_Count(rooms, 1);
 	} else {
 		console.log('No room ID specified for auto join');
 	}
@@ -279,6 +292,8 @@ function StopRunning()
 {
 	setPreference("keepRunning", false);
 }
+
+
 DisplayUI();
 
 //*********************************************************************//
