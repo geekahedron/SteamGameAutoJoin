@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.6
+// @version	2.6.1
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -200,6 +200,7 @@ function DisplayUI()
 		document.getElementById('autojoinid').focus();
 		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
 		addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
+		addGlobalStyle('.checklabel { color: #000; }');
 	}
 	
 	var options1 = document.createElement("div");
@@ -234,10 +235,6 @@ function toggleFullRooms(event)
 
 function MakeCheckBox(name, desc, state, listener)
 {
-	var asterisk = document.createElement('span');
-	asterisk.className = "asterisk";
-	asterisk.appendChild(document.createTextNode("*"));
-
 	var label = document.createElement("label");
 	var description = document.createTextNode(desc);
 	var checkbox = document.createElement("input");
@@ -246,6 +243,8 @@ function MakeCheckBox(name, desc, state, listener)
 	checkbox.name = name;
 	checkbox.checked = state;
 	checkbox.onclick = listener;
+	
+	label.classname = "checklabel";
 
 	label.appendChild(checkbox);
 	label.appendChild(description);
