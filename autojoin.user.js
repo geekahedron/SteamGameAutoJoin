@@ -81,9 +81,14 @@ function HandleJoinError(gameid, count, code, msg)
 	switch(code)
 	{
 		case 25:	// room full
-			ResetUI();
 			console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
-			ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
+			if (getPreferenceBoolean("tryFullRooms", false) === true)
+			{
+				JoinGameHelper_Count( gameid, count+1 );
+			} else {
+				ResetUI();
+				ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
+			}
 			break;
 		case 28:	// previously quit room
 			ResetUI();
@@ -97,7 +102,7 @@ function HandleJoinError(gameid, count, code, msg)
         		JoinGameHelper_Count( gameid, count+1 );
 			});
 			break;
-		case 24:
+		case 24:	// undefined error (with message, hopefully)
 			if (msg)
 			{
 				console.log( code + ' Error joining game ' + gameid + ': ' + msg );
@@ -108,9 +113,8 @@ function HandleJoinError(gameid, count, code, msg)
 				}
 				else if (msg.search("maximum number of players") != -1)
 				{
-					// 2.0.3 try a few times on a full room, just for fun
-					if (count < 5)
-					{
+					if (getPreferenceBoolean("tryFullRooms", false) === true)
+						{
 						JoinGameHelper_Count(gameid, count+1);
 					} else {
 						ResetUI();
