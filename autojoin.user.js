@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.5.7
+// @version	2.6
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -301,6 +301,7 @@ function embedFunction(s) {
 }
 
 // embed other functions used by UI after loading
+embedFunction(GetCurrentGameId);
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
 embedFunction(HandleJoinError);
