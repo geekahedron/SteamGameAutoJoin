@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.5.5
+// @version	2.5.6
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -20,6 +20,11 @@
 //*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) START COPYING HERE ***//
 //**********************************************************************//
 
+functiong GetCurrentGameId()
+{
+	return JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+}
+
 function GetCurrentGame()
 {
 	var gameid = 0;
@@ -35,7 +40,7 @@ function GetCurrentGame()
 		var paren_pos = play_div.innerHTML.search('[(]');
 		var btn_text = play_div.innerHTML;
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
-		gameid = JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+		gameid = GetCurrentGameId();
 		console.log('Current game: ' + gameid);
 		play_div.innerHTML = btn_text + ' (' + gameid + ')';
 	}
@@ -58,7 +63,7 @@ function GetCurrentGame()
 // Thanks to HandsomeMatt for the callback version of this function
 function CheckAndLeaveCurrentGame( callback )
 {
-	var currentgame = GetCurrentGame();
+	var currentgame = GetCurrentGameId();
 	if (currentgame === 0)
 		return callback();
 	console.log('Leaving current game: ' + currentgame);
