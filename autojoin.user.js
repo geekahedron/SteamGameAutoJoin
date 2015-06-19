@@ -96,13 +96,13 @@ function HandleJoinError(gameid, count, code, msg)
         	console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
         	ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
 			break;
-		case 29:	// currently in a room
-        	ResetUI();
-        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
-        	CheckAndLeaveCurrentGame( function() {
-        		JoinGameHelper_Count( gameid, count+1 );
-			});
-			break;
+//		case 29:	// currently in a room
+//        	ResetUI();
+//        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
+//        	CheckAndLeaveCurrentGame( function() {
+//        		JoinGameHelper_Count( gameid, count+1 );
+//			});
+//			break;
 		case 24:	// undefined error (with message, hopefully)
 			if (msg)
 			{
