@@ -1,8 +1,22 @@
 # SteamGameAutoJoin
 
-Displays room number on resume button.
-Adds an entry field and an "Auto Join" button to the lobby page for the Steam Summer Monster Minigame.
-Will try to connect to the specified room and will enter the room when successful (unlike other autojoin spamming scripts).
+## Purpose
+There are numerous problems with using JoinGame() and especially using setInterval scripts to call JoinGame(), mainly because JoinGame() will forcibly remove you from your current room every time it is called, whether you join a new room or not.
+
+If you are using a setInterval script or simply spam the JoinGame command too quickly, such that you call JoinGame after you have successfully entered a room, you will leave the room and no longer be allowed to join the room you just left.
+
+If you are in a room and trying to join another room using JoinGame, but the target room is full, too high a level, or one that you have previously quit and cannot enter, you will be forced out of your current room even though it's not even possible to enter the new one.
+
+I have created a script that bypasses the JoinGame function and calls the ajax API directly, handling the error messages and only leaving your current room if you need to.
+
+## Features
+Displays current room number on resume button.
+
+Adds a text entry to the game lobby where you can type in the ID of the game you wish to join, then press the Auto Join Game button and let the script do its thing (stop at any time using the Stop button, of course)!
+
+If there is an error that will not allow you into the game,it will be displayed as normal; otherwise, all errors are handled intelligently by the script and only show up in the console log.
+
+Option to continue trying if the room is full. Will not leave your current room until there is room in your target.
 
 If you are already in a room, you will not be forced to leave your current room if the target room is full, too high a level, or one you have previously quit (this is the only script that does this!).
 
