@@ -42,7 +42,7 @@ function GetCurrentGame()
 	if (gameid > 0)
 	{
 		console.log('Current game: ' + gameid);
-		play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
+		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
 		var paren_pos = play_div.innerHTML.search('[(]');
 		var btn_text = play_div.innerHTML;
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
