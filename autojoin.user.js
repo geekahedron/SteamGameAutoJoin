@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.3
+// @version	2.4
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -16,19 +16,9 @@
 (function(w) {
     "use strict";
 
+//**********************************************************************//
 //*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) START COPYING HERE ***//
-
-// http://greasemonkey.win-start.de/patterns/add-css.html
-function addGlobalStyle(css)
-{
-	var head, style;
-	head = document.getElementsByTagName('head')[0];
-	if (!head) { return; }
-	style = document.createElement('style');
-	style.type = 'text/css';
-	style.innerHTML = css;
-	head.appendChild(style);
-}
+//**********************************************************************//
 
 function GetCurrentGame()
 {
@@ -63,33 +53,6 @@ function GetCurrentGame()
 		}
 	}
 	return gameid;
-}
-
-function DisplayUI()
-{
-	if (GetCurrentGame() >= 0)
-	{
-		var game_div = document.getElementsByClassName('section_play')[0].children[0];
-		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-		GetCurrentGame();
-		var sgaj_sp = document.createElement("span");
-		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
-		game_div.appendChild(sgaj_sp,game_div.children[0]);
-		document.getElementById('autojoinid').focus();
-		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
-		addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
-	}
-	
-/*	var play_box = document.querySelector(".section_play");
-	
-	var options1 = document.createElement("div");
-	options1.className = "options_column";
-
-	options1.appendChild(makeCheckBox("tryFullRooms", "Continue when room is full", tryFullRooms, toggleFullRooms, false));
-
-	info_box.appendChild(options1);
-	*/
-	// TODO: Add UI features for users not logged in
 }
 
 // Thanks to HandsomeMatt for the callback version of this function
@@ -212,6 +175,74 @@ function AutoJoinGame()
 	}
 }
 
+//*** UI and preferences start here	***//
+
+function DisplayUI()
+{
+	if (GetCurrentGame() >= 0)
+	{
+		var game_div = document.getElementsByClassName('section_play')[0].children[0];
+		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+		GetCurrentGame();
+		var sgaj_sp = document.createElement("span");
+		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
+		game_div.appendChild(sgaj_sp,game_div.children[0]);
+		document.getElementById('autojoinid').focus();
+		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
+		addGlobalStyle('#autojoinid { color: #404; background-color: #EEE; }');
+	}
+	
+	var options1 = document.createElement("div");
+	options1.className = "options_column";
+	
+	options1.appendChild(MakeCheckBox("tryFullRooms", "Continue when room is full", false, toggleFullRooms));
+
+	game_div.appendChild(options1);
+
+	// TODO: Add UI features for users not logged in
+}
+
+// http://greasemonkey.win-start.de/patterns/add-css.html
+function addGlobalStyle(css)
+{
+	var head, style;
+	head = document.getElementsByTagName('head')[0];
+	if (!head) { return; }
+	style = document.createElement('style');
+	style.type = 'text/css';
+	style.innerHTML = css;
+	head.appendChild(style);
+}
+
+function toggleFullRooms(event)
+{
+	var value = getPreferenceBoolean("tryFullRooms", false);
+	
+	setPreferenceBoolen("tryFullRooms", !value);
+}
+
+function MakeCheckBox(name, desc, state, listener)
+{
+	var asterisk = document.createElement('span');
+	asterisk.className = "asterisk";
+	asterisk.appendChild(document.createTextNode("*"));
+
+	var label = document.createElement("label");
+	var description = document.createTextNode(desc);
+	var checkbox = document.createElement("input");
+
+	checkbox.type = "checkbox";
+	checkbox.name = name;
+	checkbox.checked = state;
+	checkbox.onclick = listener;
+	w[checkbox.name] = checkbox.checked;
+
+	label.appendChild(checkbox);
+	label.appendChild(description);
+	label.appendChild(document.createElement("br"));
+	return label;
+}
+
 function setPreference(key, value) {
 	try {
 		if(localStorage !== 'undefined') {
@@ -238,8 +269,6 @@ function getPreferenceBoolean(key, defaultValue) {
 	return (getPreference(key, defaultValue.toString()) == "true");
 }
 
-
-
 // Allow redefining of function to use as state variable
 setPreference("keepRunning", false);
 function StartRunning()
@@ -252,10 +281,11 @@ function StopRunning()
 }
 DisplayUI();
 
+//*********************************************************************//
 //*** FOR MANUAL INSTALL (COPY-PASTE INTO CONSOLE) STOP COPYING HERE ***//
+//*********************************************************************//
 
-
-// Embed functions to be called directly from the UI
+// Embed functions to be called directly from the UI in *-monkey installations
 function embedFunction(s) {
 	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
 }
@@ -267,6 +297,8 @@ embedFunction(HandleJoinError);
 embedFunction(JoinGameHelper_Count);
 embedFunction(AutoJoinGame);
 embedFunction(ResetUI);
+embedFunction(MakeCheckBox);
+embedFunction(toggleFullRooms);
 embedFunction(StopRunning);
 embedFunction(StartRunning);
 embedFunction(setPreference);
