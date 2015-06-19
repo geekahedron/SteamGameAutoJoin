@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	2.7.1
+// @version	2.8
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -22,42 +22,34 @@
 
 function GetCurrentGameId()
 {
-	return JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
+	if (play_div.tagName === "A")
+	{
+		return JoinGame.toString().match(/'[0-9]*'/)[0].replace(/'/g, '');
+	}
+	else if (play_div.innerHTML === "Sign in to play!")
+	{
+		console.log('Not signed in');
+		return -1;
+	}
+	console.log('No current game');
+	return 0;
 }
 
 function GetCurrentGame()
 {
-	var gameid = 0;
-	var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-	if (play_div.tagName == "A") // Resume your game button
+	var gameid = GetCurrentGameId();
+	if (gameid > 0)
 	{
+		console.log('Current game: ' + gameid);
 		play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0].children[0];
-
-//! 1.9 removed the hardcoded text check to allow for other languages
-//		if (play_div.innerHTML.search("Resume Your Game") != 0) {
-
-// check to see if we've already posted the room number
 		var paren_pos = play_div.innerHTML.search('[(]');
 		var btn_text = play_div.innerHTML;
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
-		gameid = GetCurrentGameId();
-		console.log('Current game: ' + gameid);
 		play_div.innerHTML = btn_text + ' (' + gameid + ')';
 	}
-	else if (play_div.tagName == "SPAN")	// no game or not logged in
-	{
-		if (play_div.innerHTML == "Play Now!")
-		{
-			console.log('No current game');
-			gameid = 0;
-		}
-		else if (play_div.innerHTML == "Sign in to play!")
-		{
-			console.log('Not signed in');
-			gameid = -1;
-		}
-	}
 	return gameid;
+
 }
 
 // Thanks to HandsomeMatt for the callback version of this function
@@ -193,7 +185,6 @@ function DisplayUI()
 	{
 		var game_div = document.getElementsByClassName('section_play')[0].children[0];
 		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
-		GetCurrentGame();
 		var sgaj_sp = document.createElement("span");
 		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
 		game_div.appendChild(sgaj_sp,game_div.children[0]);
