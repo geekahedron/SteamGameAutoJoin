@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.0.0
+// @version	3.1.0
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -62,16 +62,57 @@ function CheckAndLeaveCurrentGame( callback )
 	$J.post(
 		'http://steamcommunity.com/minigame/ajaxleavegame/',
 		{ 'gameid' : currentgame, 'sessionid' : g_sessionID }
-	).done( function() { callback(); }
+	).done(
+        function() { callback(); }
 	);
 }
 
 function ResetUI()
 {
     	StopRunning();
-    	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game"
+    	document.getElementById("auto_btn").children[0].innerHTML = "Auto Join Game";
     	document.getElementById("autojoinid").value = "";
     	document.getElementById("autojoinid").focus();
+}
+
+function JoinGameLoop(roomlist, count)
+{
+    var rooms = roomlist.toArray();
+    var gameid = rooms.pop();
+    rooms.unshift(gameid);
+
+    if (rooms.length == 0)
+    {
+		ResetUI();
+		console.log('Out of rooms');
+    }
+	else if (getPreferenceBoolean("keepRunning", false) === false) {
+		ResetUI();
+		console.log('Execution stopped by user');
+	}
+    else
+    {
+        $J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
+        .done(
+            function( json ) {
+                if ( json.success == '1' )
+                {
+                    top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+                }
+                else
+                {
+                    console.log('Failed to join game ' + gameid);
+                    JoinGameHelper_Count(rooms, count+1);
+                }
+            }
+        )
+        .fail(
+            function( jqXHR ) {
+                var responseJSON = jqXHR.responseText.evalJSON();
+                HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
+            }
+        );
+    }
 }
 
 function HandleJoinError(rooms, gameid, count, code, msg)
@@ -82,7 +123,7 @@ function HandleJoinError(rooms, gameid, count, code, msg)
 			console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
 			if (getPreferenceBoolean("tryFullRooms", false) === true)
 			{
-				JoinGameHelper_Count( gameid, count+1 );
+				JoinGameLoop(rooms, count+1 );
 			} else {
 				ResetUI();
 				ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
@@ -113,7 +154,7 @@ function HandleJoinError(rooms, gameid, count, code, msg)
 				{
 					if (getPreferenceBoolean("tryFullRooms", false) === true)
 						{
-						JoinGameHelper_Count(gameid, count+1);
+						JoinGameLoop(rooms, count+1 );
 					} else {
 						ResetUI();
 						ShowAlertDialog( 'Error joining ' + gameid, msg );
@@ -122,7 +163,7 @@ function HandleJoinError(rooms, gameid, count, code, msg)
 				else
 				{
 					CheckAndLeaveCurrentGame( function() {
-						JoinGameHelper_Count( gameid, count+1 );
+						JoinGameLoop(rooms, count+1 );
 					});
 				}
 				break;
@@ -130,49 +171,9 @@ function HandleJoinError(rooms, gameid, count, code, msg)
 		default:
 			console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
 			CheckAndLeaveCurrentGame( function() {
-				JoinGameHelper_Count( gameid, count+1 );
+				JoinGameLoop(rooms, count+1 );
 			});
 	}
-}
-
-function JoinGameHelper_Count( rooms, count )
-{
-	if (!rooms || rooms.length === 0)
-	{
-		ResetUI();
-		console.log('Out of rooms!');
-		return;
-	}
-	if (getPreferenceBoolean("keepRunning", false) === false) {
-		ResetUI();
-		console.log('Execution stopped by user');
-		return;
-	}
-	if (!count) count = 1;
-
-	var gameid = rooms.pop();
-	rooms.unshift(gameid);
-	
-	console.log('Attempting to join game ' + gameid + ' (Attempt ' + count + ')');
-	$J.post(
-		'http://steamcommunity.com/minigame/ajaxjoingame/',
-		{ 'gameid' : gameid, 'sessionid' : g_sessionID }
-	).done( function( json ) {
-		if ( json.success == '1' )
-		{
-			top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-		}
-		else
-		{
-			console.log('Failed to join game ' + gameid);
-			JoinGameHelper_Count(rooms, count+1);
-		}
-	}
-	).fail( function( jqXHR ) {
-			var responseJSON = jqXHR.responseText.evalJSON();
-			HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
-		}
-	);
 }
 
 function AutoJoinGame()
@@ -184,7 +185,7 @@ function AutoJoinGame()
 		var rooms = gameid.split(',');
 		document.getElementById("auto_btn").children[0].innerHTML = "Running..."
 		console.log('Launching auto join for room(s): ' + gameid);
-		JoinGameHelper_Count(rooms, 1);
+		JoinGameLoop(rooms, 1);
 	} else {
 		console.log('No room ID specified for auto join');
 	}
@@ -302,6 +303,7 @@ DisplayUI();
 
 // Embed functions to be called directly from the UI in *-monkey installations
 function embedFunction(s) {
+    console.log('embedding: ' + s.name);
 	document.body.appendChild(document.createElement('script')).innerHTML=s.toString().replace(/([\s\S]*?return;){2}([\s\S]*)}/,'$2');
 }
 
@@ -309,8 +311,8 @@ function embedFunction(s) {
 embedFunction(GetCurrentGameId);
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(JoinGameLoop);
 embedFunction(HandleJoinError);
-embedFunction(JoinGameHelper_Count);
 embedFunction(AutoJoinGame);
 embedFunction(ResetUI);
 embedFunction(MakeCheckBox);
