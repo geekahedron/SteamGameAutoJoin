@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.2.3
+// @version	3.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -98,21 +98,30 @@ function JoinGameLoop(roomlist, count)
 		console.log('Execution stopped by user');
 	} else {
 		console.log('(' + count + ') Joining room ' + gameid + ' [' + roomlist + ']');
-		$J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
-		.done(
-			function( json ) {
-			if ( json.success == '1' ) {
-				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-			} else {
-				console.log('Failed to join game ' + gameid);
+		try {
+			$J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
+			.done(
+				function( json ) {
+					if ( json.success == '1' ) {
+						console.log('Success! Joining room now');
+						top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+					} else {
+						console.log('Not successful to join game ' + gameid);
+						JoinGameLoop(rooms, count+1);
+					}
+				}).fail(
+				function( jqXHR ) {
+					console.log('Failed to join game ' + gameid);
+					var responseJSON = jqXHR.responseText.evalJSON();
+					HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
+				}
+			);
+		}
+		catch(e)	// 3.3 catch other errors (timeout, etc) that aren't handled by JSON
+			{
+				console.log(e);
 				JoinGameLoop(rooms, count+1);
 			}
-		}).fail(
-			function( jqXHR ) {
-				var responseJSON = jqXHR.responseText.evalJSON();
-				HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
-			}
-		);
 	}
 }
 
