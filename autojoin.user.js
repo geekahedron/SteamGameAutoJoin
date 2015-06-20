@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.1.0
+// @version	3.1.2
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -102,7 +102,7 @@ function JoinGameLoop(roomlist, count)
                 else
                 {
                     console.log('Failed to join game ' + gameid);
-                    JoinGameHelper_Count(rooms, count+1);
+                    JoinGameLoop(rooms, count+1);
                 }
             }
         )
@@ -135,10 +135,9 @@ function HandleJoinError(rooms, gameid, count, code, msg)
 			ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
 			break;
 //		case 29:	// currently in a room
-//        	ResetUI();
 //        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
 //        	CheckAndLeaveCurrentGame( function() {
-//        		JoinGameHelper_Count( gameid, count+1 );
+//        		JoinGameLoop( gameid, count+1 );
 //			});
 //			break;
 		case 24:	// undefined error (with message, hopefully)
