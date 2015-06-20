@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.2.1
+// @version	3.2.2
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -77,43 +77,44 @@ function ResetUI()
 
 function JoinGameLoop(roomlist, count)
 {
-    var rooms = roomlist.toArray();
-    var gameid = rooms.pop();
-    rooms.unshift(gameid);
+	console.log('JoinGameLoop('+roomlist+','+count+')');
+	var rooms = roomlist.toArray();
+	
+	var gameid = rooms.pop();
+	if (gameid && gameid.match(/^\d{5}$/))	// 3.2.2 verify 5-digit number
+	{
+		rooms.unshift(gameid);
+	} else {
+		console.log(gameid + ' is not a valid room number, removing');
+		if (rooms.length > 0) JoinGameLoop(rooms, count);
+	}
 
-    if (rooms.length === 0)
-    {
+	if (rooms.length === 0)
+	{
 		ResetUI();
 		console.log('Out of rooms');
-    }
+	}
 	else if (getPreferenceBoolean("keepRunning", false) === false) {
 		ResetUI();
 		console.log('Execution stopped by user');
+	} else {
+		console.log('(' + count + ') Joining room ' + gameid + ' [' + roomlist + ']');
+		$J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
+		.done(
+			function( json ) {
+			if ( json.success == '1' ) {
+				top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
+			} else {
+				console.log('Failed to join game ' + gameid);
+				JoinGameLoop(rooms, count+1);
+			}
+		}).fail(
+			function( jqXHR ) {
+				var responseJSON = jqXHR.responseText.evalJSON();
+				HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
+			}
+		);
 	}
-    else
-    {
-    	console.log('(' + count + ') Joining room ' + gameid + ' [' + roomlist + ']');
-        $J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
-        .done(
-            function( json ) {
-                if ( json.success == '1' )
-                {
-                    top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
-                }
-                else
-                {
-                    console.log('Failed to join game ' + gameid);
-                    JoinGameLoop(rooms, count+1);
-                }
-            }
-        )
-        .fail(
-            function( jqXHR ) {
-                var responseJSON = jqXHR.responseText.evalJSON();
-                HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
-            }
-        );
-    }
 }
 
 function HandleJoinError(roomlist, gameid, count, code, msg)
@@ -212,9 +213,11 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 
 function AutoJoinGame()
 {
-    StartRunning();
-    var gameid = document.getElementById("autojoinid").value;
-	if (gameid)
+	StartRunning();
+	var gameid = document.getElementById("autojoinid").value;
+	gameid.replace(/[^0-9,]/g,'');	// 3.2.2 try and make sure there are only valid characters
+	document.getElementById("autojoinid").value = gameid;
+	if (gameid.search(/\d/) > -1)	// make sure we have at least a digit in there (for future, enforce 5-digit numbers?)
 	{
 		var rooms = gameid.split(',');
 		document.getElementById("auto_btn").children[0].innerHTML = "Running..."
