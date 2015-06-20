@@ -24,7 +24,8 @@ New in version 3: Loop through multiple rooms at once (comma-separated list)!
 
 ## Usage
 Adds a text field and two buttons to the join game (lobby) page of the Steam minigame. Type the desired room number into the box and click "AutoJoin room." 
-**NEW** Type several room numbers, separated by commas (no spaces) and the script will loop through trying to join all of them at once!
+
+**NEW** Type several room numbers, separated by commas (no spaces) and the script will loop through trying to join all of them at once! You can also type one room number, click the button, type another room number, click the button again, and so on, to run the script several times in parallel.
 
 Script will continue to try joining the room and capture errors. Stops automatically when the room is full or if you cannot join for other reasons (too high level, or previously left the room). Click the stop button at any time to manually stop the script from running and enter a new room number.
 
