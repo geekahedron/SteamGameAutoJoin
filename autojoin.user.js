@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.2.2
+// @version	3.2.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -77,7 +77,6 @@ function ResetUI()
 
 function JoinGameLoop(roomlist, count)
 {
-	console.log('JoinGameLoop('+roomlist+','+count+')');
 	var rooms = roomlist.toArray();
 	
 	var gameid = rooms.pop();
