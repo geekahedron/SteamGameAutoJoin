@@ -140,69 +140,52 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 {
 	var rooms = roomlist.toArray();
 	try {
-	switch(code)
-	{
-		case 25:	// room full
-			console.log( code + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
-			if (getPreferenceBoolean("tryFullRooms", true) != false)
-			{
-				JoinGameLoop(rooms, count+1 );
-			} else {
-				var gid = rooms.shift();
-				console.log('Removing room ' + gid + ' from queue');
-				if (rooms.length === 0)
+		switch(code)
+		{
+			case 25:	// room full
+				console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
+				if (getPreferenceBoolean("tryFullRooms", true) != false)
 				{
-					console.log('No more rooms in queue');
-					ResetUI();
-					ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
-				} else {
 					JoinGameLoop(rooms, count+1 );
-				}
-				
-			}
-			break;
-		case 28:	// previously quit room
-			console.log( code + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-			var gid = rooms.shift();
-			console.log('Removing room ' + gid + ' from queue');
-			if (rooms.length === 0)
-			{
-				console.log('No more rooms in queue');
-				ResetUI();
-				ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
-			} else {
-				JoinGameLoop(rooms, count+1 );
-			}
-				break;
-//		case 29:	// currently in a room
-//        	console.log( code + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
-//        	CheckAndLeaveCurrentGame( function() {
-//        		JoinGameLoop( gameid, count+1 );
-//			});
-//			break;
-		case 24:	// undefined error (with message, hopefully)
-			if (msg)
-			{
-				console.log( code + ' Error joining game ' + gameid + ': ' + msg );
-				if (msg.search("higher than the highest level you have completed") != -1)
-				{
+				} else {
 					var gid = rooms.shift();
 					console.log('Removing room ' + gid + ' from queue');
 					if (rooms.length === 0)
 					{
 						console.log('No more rooms in queue');
 						ResetUI();
-						ShowAlertDialog( 'Error joining ' + gameid, msg );
+						ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
 					} else {
 						JoinGameLoop(rooms, count+1 );
 					}
+					
 				}
-				else if (msg.search("maximum number of players") != -1)
+				break;
+			case 28:	// previously quit room
+				console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+				var gid = rooms.shift();
+				console.log('Removing room ' + gid + ' from queue');
+				if (rooms.length === 0)
 				{
-					if (getPreferenceBoolean("tryFullRooms", true) != false)
-						{
-						JoinGameLoop(rooms, count+1 );
-					} else {
+					console.log('No more rooms in queue');
+					ResetUI();
+					ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
+				} else {
+					JoinGameLoop(rooms, count+1 );
+				}
+				break;
+			case 29:	// currently in a room
+		        	console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
+	        		CheckAndLeaveCurrentGame( function() {
+	        			JoinGameLoop( gameid, count+1 );
+				});
+				break;
+			case 24:	// undefined error (with message, hopefully)
+				if (msg)
+				{
+					console.log( code + ' Error joining game ' + gameid + ': ' + msg );
+					if (msg.search("higher than the highest level you have completed") != -1)
+					{
 						var gid = rooms.shift();
 						console.log('Removing room ' + gid + ' from queue');
 						if (rooms.length === 0)
@@ -214,22 +197,39 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 							JoinGameLoop(rooms, count+1 );
 						}
 					}
-				}
-				else
-				{
-					CheckAndLeaveCurrentGame( function() {
-						JoinGameLoop(rooms, count+1 );
-					});
-				}
-				break;
-			}	// if there is no message, assume the worst and cascade to default response
-		default:
-			console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
-			CheckAndLeaveCurrentGame( function() {
-				JoinGameLoop(rooms, count+1 );
-			});
-	}
-	}
+					else if (msg.search("maximum number of players") != -1)
+					{
+						if (getPreferenceBoolean("tryFullRooms", true) != false)
+							{
+							JoinGameLoop(rooms, count+1 );
+						} else {
+							var gid = rooms.shift();
+							console.log('Removing room ' + gid + ' from queue');
+							if (rooms.length === 0)
+							{
+								console.log('No more rooms in queue');
+								ResetUI();
+								ShowAlertDialog( 'Error joining ' + gameid, msg );
+							} else {
+								JoinGameLoop(rooms, count+1 );
+							}
+						}
+					}
+					else
+					{
+						CheckAndLeaveCurrentGame( function() {
+							JoinGameLoop(rooms, count+1 );
+						});
+					}
+					break;
+				}	// if there is no message, assume the worst and cascade to default response
+			default:
+				console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+				CheckAndLeaveCurrentGame( function() {
+					JoinGameLoop(rooms, count+1 );
+				});
+		} // switch
+	} // try
 	catch(e)
 	{
 		console.log('Problem handling response: ' + code + ' : ' + msg);
