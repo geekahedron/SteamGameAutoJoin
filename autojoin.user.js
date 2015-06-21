@@ -137,6 +137,7 @@ function JoinGameLoop(roomlist, count)
 function HandleJoinError(roomlist, gameid, count, code, msg)
 {
 	var rooms = roomlist.toArray();
+	try {
 	switch(code)
 	{
 		case 25:	// room full
@@ -225,6 +226,13 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 			CheckAndLeaveCurrentGame( function() {
 				JoinGameLoop(rooms, count+1 );
 			});
+	}
+	}
+	catch(e)
+	{
+		console.log('Problem handling response: ' + code + ' : ' + msg);
+		console.log(e);
+		JoinGameLoop(rooms,count+1);
 	}
 }
 
