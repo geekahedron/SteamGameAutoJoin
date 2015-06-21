@@ -1,5 +1,19 @@
 # SteamGameAutoJoin
 
+## Installation
+###Tampermonkey
+
+Visit https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
+When the editor has loaded, click Install (NOT Process with Chrome).
+
+###Greasemonkey
+
+Navigate to https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
+Right click on the page, and click Save Page As.
+While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
+Drag & drop the script file onto the Firefox window.
+Press Install.
+
 ## Purpose
 There are numerous problems with using JoinGame() and especially using setInterval scripts to call JoinGame(), mainly because JoinGame() will forcibly remove you from your current room every time it is called, whether you join a new room or not.
 
