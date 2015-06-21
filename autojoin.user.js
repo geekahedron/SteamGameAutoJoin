@@ -60,12 +60,20 @@ function CheckAndLeaveCurrentGame( callback )
 	if (currentgame === 0)
 		return callback();
 	console.log('Leaving current game: ' + currentgame);
-	$J.post(
-		'http://steamcommunity.com/minigame/ajaxleavegame/',
-		{ 'gameid' : currentgame, 'sessionid' : g_sessionID }
-	).done(
-        function() { callback(); }
-	);
+	try {
+		$J.post(
+			'http://steamcommunity.com/minigame/ajaxleavegame/',
+			{ 'gameid' : currentgame, 'sessionid' : g_sessionID }
+		).done(
+			function() { callback(); }
+		);
+	}
+	catch(e)
+	{
+		console.log('Error leaving current game');
+		console.log(e);
+		callback();
+	}
 }
 
 function ResetUI()
@@ -119,10 +127,10 @@ function JoinGameLoop(roomlist, count)
 			);
 		}
 		catch(e)	// 3.3 catch other errors (timeout, etc) that aren't handled by JSON
-			{
-				console.log(e);
-				JoinGameLoop(rooms, count+1);
-			}
+		{
+			console.log(e);
+			JoinGameLoop(rooms, count+1);
+		}
 	}
 }
 
