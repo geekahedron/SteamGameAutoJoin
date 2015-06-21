@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.5
+// @version	3.6
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -33,7 +33,6 @@ function GetCurrentGameId()
 		console.log('Not signed in');
 		return -1;
 	}
-	console.log('No current game');
 	return 0;
 }
 
@@ -49,8 +48,11 @@ function GetCurrentGame()
 		if (paren_pos > 0) btn_text = play_div.innerHTML.substr(0,paren_pos-1);
 		play_div.innerHTML = btn_text + ' (' + gameid + ')';
 	}
+	else if (gameid === 0)
+	{
+		console.log('No current game');
+	}
 	return gameid;
-
 }
 
 // Thanks to HandsomeMatt for the callback version of this function
