@@ -45,5 +45,7 @@ Adds a text field and two buttons to the join game (lobby) page of the Steam min
 
 Script will continue to try joining the room and capture errors. Stops automatically when the room is full or if you cannot join for other reasons (too high level, or previously left the room). Click the stop button at any time to manually stop the script from running and enter a new room number.
 
+Press enter to start and escape to stop.
+
 TODO: Add autojoin buttons and room numbers on friends list
 TODO: Pull in known room numbers from various sources (steamga.me, MSG15, CMP2015, YOWH, etc)
