@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.6
+// @version	3.7
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -258,11 +258,18 @@ function AutoJoinGame()
 function CheckKey(e)
 {
 	e = e || window.event;
-	if (e.keyCode == 13)
+	switch(e.keyCode)
 	{
-		console.log('Enter pressed');
-		document.getElementById('auto_btn').click();
+		case 13:	// enter 
+			console.log('Enter pressed');
+			AutoJoinGame();
+			break;
+		case 27:	// esc
+			console.log('Esc pressed');
+			StopRunning();
+			break;
 	}
+	
 }
 
 //*** UI and preferences start here	***//
@@ -274,7 +281,7 @@ function DisplayUI()
 		var game_div = document.getElementsByClassName('section_play')[0].children[0];
 		var play_div = document.getElementsByClassName('section_play')[0].children[1].children[0].children[0];
 		var sgaj_sp = document.createElement("span");
-		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" onkeypress="javascript:CheckKey(event)" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
+		sgaj_sp.innerHTML = '<span><label for="autojoinid" class="main_btn">Game ID</label><input type="text" id="autojoinid" name="autojoinid" class="main_btn" onKeyDown="javascript:CheckKey(event)" /></span><a onClick="javascript:AutoJoinGame()" class="main_btn" id="auto_btn"><span>Auto Join Game</span></a><a onClick="javascript:StopRunning()" class="main_btn" id="stop_btn"><span>Stop</span></a>';
 		game_div.appendChild(sgaj_sp,game_div.children[0]);
 		document.getElementById('autojoinid').focus();
 		addGlobalStyle('.section_play .current_game, .section_play .new_game {  margin-top: 10px; }');
