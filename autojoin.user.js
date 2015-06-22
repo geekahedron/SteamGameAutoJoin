@@ -232,7 +232,7 @@ function AddQueue(gameid)
 	var list = getPreference("roomlist", '');
 	var rooms = list.split(',');
 	rooms.unshift(gameid+'');
-	removeByValue(rooms,'';
+	removeByValue(rooms,'');
 	setPreference("roomlist",rooms.toString());
 }
 
