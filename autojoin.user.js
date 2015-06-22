@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.9
+// @version	4.0
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
 // @match	*://steamcommunity.com//minigame
 // @match	*://steamcommunity.com/minigame/
 // @match	*://steamcommunity.com//minigame/
-// @updateURL	https://github.com/geekahedron/SteamGameAutoJoin/blob/multithreading/autojoin.user.js
+// @updateURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
 // @downloadURL	https://raw.githubusercontent.com/geekahedron/SteamGameAutoJoin/master/autojoin.user.js
 // @grant	none
 // ==/UserScript==
@@ -89,12 +89,15 @@ function ResetUI()
 function JoinGameList(roomlist)
 {
 	var rooms = roomlist.toArray();
+//    console.log(rooms);
 
-	for (gameid in rooms)
+	for (i = 0,x = rooms.length; i<x; i++)
 	{
+        var gameid = rooms[i];
+//        console.log('checking: ' + gameid);
 		if (gameid && gameid.match(/^\d{5}$/))	// verify 5-digit number
 		{
-			setInterval(JoinGameLoop,10,gameid, 1);
+			setTimeout(JoinGameLoop,10,gameid, 1);
 		} else {
 			console.log('Invalid room number: ' + gameid);
 		}
@@ -107,7 +110,7 @@ function JoinGameLoop(gameid, count)
 		ResetUI();
 		console.log('Execution stopped by user');
 	} else {
-		console.log('(' + count + ') Joining room ' + gameid + ' [' + roomlist + ']');
+		console.log('(' + count + ') Joining room ' + gameid + ' [' + gameid + ']');
 		try {
 			$J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
 			.done(
@@ -117,11 +120,11 @@ function JoinGameLoop(gameid, count)
 						top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
 					} else {
 						console.log('Not successful to join game ' + gameid);
-						setInterval(JoinGameLoop,10,gameid, count+1);
+						JoinGameLoop(gameid, count+1);
 					}
 				}).fail(
 				function( jqXHR ) {
-					console.log('Failed to join game ' + gameid);
+//					console.log('Failed to join game ' + gameid);
 					var responseJSON = jqXHR.responseText.evalJSON();
 					HandleJoinError(gameid, count, responseJSON.success, responseJSON.errorMsg)
 				}
@@ -129,8 +132,9 @@ function JoinGameLoop(gameid, count)
 		}
 		catch(e)	// 3.3 catch other errors (timeout, etc) that aren't handled by JSON
 		{
+			console.log('Catching error from API call');
 			console.log(e);
-			setInterval(JoinGameLoop,10,gameid, count+1);
+			JoinGameLoop(gameid, count+1);
 		}
 	}
 }
@@ -156,7 +160,7 @@ function HandleJoinError(gameid, count, code, msg)
 			case 29:	// currently in a room
 		        	console.log( '[' + code + '] Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
 	        		CheckAndLeaveCurrentGame( function() {
-	        			setIntervale(JoinGameLoop,10,gameid, count+1 );
+	        			JoinGameLoop(gameid, count+1 );
 				});
 				break;
 			case 24:	// undefined error (with message, hopefully)
@@ -171,7 +175,7 @@ function HandleJoinError(gameid, count, code, msg)
 					{
 						if (getPreferenceBoolean("tryFullRooms", true) != false)
 							{
-							JoinGameLoop(rooms, count+1 );
+							JoinGameLoop(gameid, count+1 );
 						} else {
 							console.log('Stopping loop on room: ' + gameid);
 						}
@@ -180,7 +184,7 @@ function HandleJoinError(gameid, count, code, msg)
 					{
 						console.log('Unknown error, trying to leave current room');
 						CheckAndLeaveCurrentGame( function() {
-							setInterval(JoinGameLoop,10,rooms, count+1 );
+							JoinGameLoop(gameid, count+1 );
 						});
 					}
 					break;
@@ -189,7 +193,7 @@ function HandleJoinError(gameid, count, code, msg)
 				console.log( '[' + code + '] Error joining game ' + gameid + ': There was a problem trying to join the game.' );
 				console.log('Fallback error, trying to leave current room');
 				CheckAndLeaveCurrentGame( function() {
-					setInterval(JoinGameLoop,10,rooms, count+1 );
+					JoinGameLoop(gameid, count+1 );
 				});
 		} // switch
 	} // try
@@ -197,7 +201,7 @@ function HandleJoinError(gameid, count, code, msg)
 	{
 		console.log('Problem handling response: ' + code + ' : ' + msg);
 		console.log(e);
-		setIntervale(JoinGameLoop,10,rooms,count+1);
+		JoinGameLoop(gameid,count+1);
 	}
 }
 
