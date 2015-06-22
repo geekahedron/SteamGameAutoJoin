@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.8
+// @version	4.0
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -86,29 +86,31 @@ function ResetUI()
     	document.getElementById("autojoinid").focus();
 }
 
-function JoinGameLoop(roomlist, count)
+function JoinGameList(roomlist)
 {
 	var rooms = roomlist.toArray();
-	
-	var gameid = rooms.pop();
-	if (gameid && gameid.match(/^\d{5}$/))	// 3.2.2 verify 5-digit number
-	{
-		rooms.unshift(gameid);
-	} else {
-		console.log(gameid + ' is not a valid room number, removing');
-		if (rooms.length > 0) JoinGameLoop(rooms, count);
-	}
+//    console.log(rooms);
 
-	if (rooms.length === 0)
+	for (i = 0,x = rooms.length; i<x; i++)
 	{
-		ResetUI();
-		console.log('Out of rooms');
+        var gameid = rooms[i];
+//        console.log('checking: ' + gameid);
+		if (gameid && gameid.match(/^\d{5}$/))	// verify 5-digit number
+		{
+			setTimeout(JoinGameLoop,10,gameid, 1);
+		} else {
+			console.log('Invalid room number: ' + gameid);
+		}
 	}
-	else if (getPreferenceBoolean("keepRunning", false) === false) {
+}
+
+function JoinGameLoop(gameid, count)
+{
+	if (getPreferenceBoolean("keepRunning", false) === false) {
 		ResetUI();
 		console.log('Execution stopped by user');
 	} else {
-		console.log('(' + count + ') Joining room ' + gameid + ' [' + roomlist + ']');
+		console.log('(' + count + ') Joining room ' + gameid + ' [' + gameid + ']');
 		try {
 			$J.post('http://steamcommunity.com/minigame/ajaxjoingame/', { 'gameid' : gameid, 'sessionid' : g_sessionID })
 			.done(
@@ -118,27 +120,27 @@ function JoinGameLoop(roomlist, count)
 						top.location.href = 'http://steamcommunity.com/minigame/towerattack/';
 					} else {
 						console.log('Not successful to join game ' + gameid);
-						JoinGameLoop(rooms, count+1);
+						JoinGameLoop(gameid, count+1);
 					}
 				}).fail(
 				function( jqXHR ) {
-					console.log('Failed to join game ' + gameid);
+//					console.log('Failed to join game ' + gameid);
 					var responseJSON = jqXHR.responseText.evalJSON();
-					HandleJoinError(rooms, gameid, count, responseJSON.success, responseJSON.errorMsg)
+					HandleJoinError(gameid, count, responseJSON.success, responseJSON.errorMsg)
 				}
 			);
 		}
 		catch(e)	// 3.3 catch other errors (timeout, etc) that aren't handled by JSON
 		{
+			console.log('Catching error from API call');
 			console.log(e);
-			JoinGameLoop(rooms, count+1);
+			JoinGameLoop(gameid, count+1);
 		}
 	}
 }
 
-function HandleJoinError(roomlist, gameid, count, code, msg)
+function HandleJoinError(gameid, count, code, msg)
 {
-	var rooms = roomlist.toArray();
 	try {
 		switch(code)
 		{
@@ -146,38 +148,19 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 				console.log( '[' + code + '] Error joining game ' + gameid + ': it already has the maximum number of players.' );
 				if (getPreferenceBoolean("tryFullRooms", true) != false)
 				{
-					JoinGameLoop(rooms, count+1 );
+					JoinGameLoop(gameid, count+1 );
 				} else {
-					var gid = rooms.shift();
-					console.log('Removing room ' + gid + ' from queue');
-					if (rooms.length === 0)
-					{
-						console.log('No more rooms in queue');
-						ResetUI();
-						ShowAlertDialog( 'Error joining ' + gameid, 'There was a problem trying to join the game: it already has the maximum number of players.' );
-					} else {
-						JoinGameLoop(rooms, count+1 );
-					}
-					
+					console.log('Stopping loop on room: ' + gameid);
 				}
 				break;
 			case 28:	// previously quit room
 				console.log( '[' + code + '] Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
-				var gid = rooms.shift();
-				console.log('Removing room ' + gid + ' from queue');
-				if (rooms.length === 0)
-				{
-					console.log('No more rooms in queue');
-					ResetUI();
-					ShowAlertDialog( 'Error joining ' + gameid, 'You have previously left this game. You cannot join this game again.' );
-				} else {
-					JoinGameLoop(rooms, count+1 );
-				}
+				console.log('Stopping loop on room: ' + gameid);
 				break;
 			case 29:	// currently in a room
 		        	console.log( '[' + code + '] Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
 	        		CheckAndLeaveCurrentGame( function() {
-	        			JoinGameLoop( gameid, count+1 );
+	        			JoinGameLoop(gameid, count+1 );
 				});
 				break;
 			case 24:	// undefined error (with message, hopefully)
@@ -186,40 +169,22 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 					console.log( '[' + code + '] Error joining game ' + gameid + ': ' + msg );
 					if (msg.search("higher than the highest level you have completed") != -1)
 					{
-						var gid = rooms.shift();
-						console.log('Removing room ' + gid + ' from queue');
-						if (rooms.length === 0)
-						{
-							console.log('No more rooms in queue');
-							ResetUI();
-							ShowAlertDialog( 'Error joining ' + gameid, msg );
-						} else {
-							JoinGameLoop(rooms, count+1 );
-						}
+						console.log('Stopping loop on room: ' + gameid);
 					}
 					else if (msg.search("maximum number of players") != -1)
 					{
 						if (getPreferenceBoolean("tryFullRooms", true) != false)
 							{
-							JoinGameLoop(rooms, count+1 );
+							JoinGameLoop(gameid, count+1 );
 						} else {
-							var gid = rooms.shift();
-							console.log('Removing room ' + gid + ' from queue');
-							if (rooms.length === 0)
-							{
-								console.log('No more rooms in queue');
-								ResetUI();
-								ShowAlertDialog( 'Error joining ' + gameid, msg );
-							} else {
-								JoinGameLoop(rooms, count+1 );
-							}
+							console.log('Stopping loop on room: ' + gameid);
 						}
 					}
 					else
 					{
 						console.log('Unknown error, trying to leave current room');
 						CheckAndLeaveCurrentGame( function() {
-							JoinGameLoop(rooms, count+1 );
+							JoinGameLoop(gameid, count+1 );
 						});
 					}
 					break;
@@ -228,7 +193,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 				console.log( '[' + code + '] Error joining game ' + gameid + ': There was a problem trying to join the game.' );
 				console.log('Fallback error, trying to leave current room');
 				CheckAndLeaveCurrentGame( function() {
-					JoinGameLoop(rooms, count+1 );
+					JoinGameLoop(gameid, count+1 );
 				});
 		} // switch
 	} // try
@@ -236,7 +201,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 	{
 		console.log('Problem handling response: ' + code + ' : ' + msg);
 		console.log(e);
-		JoinGameLoop(rooms,count+1);
+		JoinGameLoop(gameid,count+1);
 	}
 }
 
@@ -251,7 +216,7 @@ function AutoJoinGame()
 		var rooms = gameid.split(',');
 		document.getElementById("auto_btn").children[0].innerHTML = "Running..."
 		console.log('Launching auto join for room(s): ' + gameid);
-		JoinGameLoop(rooms, 1);
+		JoinGameList(rooms);
 	} else {
 		console.log('No room ID specified for auto join');
 	}
@@ -394,6 +359,7 @@ function embedFunction(s) {
 embedFunction(GetCurrentGameId);
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(JoinGameList);
 embedFunction(JoinGameLoop);
 embedFunction(HandleJoinError);
 embedFunction(AutoJoinGame);
