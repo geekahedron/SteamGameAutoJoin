@@ -355,6 +355,7 @@ function embedFunction(s) {
 embedFunction(GetCurrentGameId);
 embedFunction(GetCurrentGame);
 embedFunction(CheckAndLeaveCurrentGame);
+embedFunction(JoinGameList);
 embedFunction(JoinGameLoop);
 embedFunction(HandleJoinError);
 embedFunction(AutoJoinGame);
