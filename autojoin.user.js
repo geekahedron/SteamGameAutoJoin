@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	3.7
+// @version	3.8
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -143,7 +143,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 		switch(code)
 		{
 			case 25:	// room full
-				console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': it already has the maximum number of players.' );
+				console.log( '[' + code + '] Error joining game ' + gameid + ': it already has the maximum number of players.' );
 				if (getPreferenceBoolean("tryFullRooms", true) != false)
 				{
 					JoinGameLoop(rooms, count+1 );
@@ -162,7 +162,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 				}
 				break;
 			case 28:	// previously quit room
-				console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
+				console.log( '[' + code + '] Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
 				var gid = rooms.shift();
 				console.log('Removing room ' + gid + ' from queue');
 				if (rooms.length === 0)
@@ -175,7 +175,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 				}
 				break;
 			case 29:	// currently in a room
-		        	console.log( '[' + code + ']' + ' Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
+		        	console.log( '[' + code + '] Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
 	        		CheckAndLeaveCurrentGame( function() {
 	        			JoinGameLoop( gameid, count+1 );
 				});
@@ -183,7 +183,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 			case 24:	// undefined error (with message, hopefully)
 				if (msg)
 				{
-					console.log( code + ' Error joining game ' + gameid + ': ' + msg );
+					console.log( '[' + code + '] Error joining game ' + gameid + ': ' + msg );
 					if (msg.search("higher than the highest level you have completed") != -1)
 					{
 						var gid = rooms.shift();
@@ -217,6 +217,7 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 					}
 					else
 					{
+						console.log('Unknown error, trying to leave current room');
 						CheckAndLeaveCurrentGame( function() {
 							JoinGameLoop(rooms, count+1 );
 						});
@@ -224,7 +225,8 @@ function HandleJoinError(roomlist, gameid, count, code, msg)
 					break;
 				}	// if there is no message, assume the worst and cascade to default response
 			default:
-				console.log( code + ' Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+				console.log( '[' + code + '] Error joining game ' + gameid + ': There was a problem trying to join the game.' );
+				console.log('Fallback error, trying to leave current room');
 				CheckAndLeaveCurrentGame( function() {
 					JoinGameLoop(rooms, count+1 );
 				});
