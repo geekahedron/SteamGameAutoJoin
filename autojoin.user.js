@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	4.0
+// @version	4.1
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -98,6 +98,7 @@ function JoinGameList(roomlist)
 		if (gameid && gameid.match(/^\d{5}$/))	// verify 5-digit number
 		{
 			setTimeout(JoinGameLoop,10,gameid, 1);
+			AddQueue(gameid);
 		} else {
 			console.log('Invalid room number: ' + gameid);
 		}
@@ -151,11 +152,13 @@ function HandleJoinError(gameid, count, code, msg)
 					JoinGameLoop(gameid, count+1 );
 				} else {
 					console.log('Stopping loop on room: ' + gameid);
+					RemoveQueue(gameid);
 				}
 				break;
 			case 28:	// previously quit room
 				console.log( '[' + code + '] Error joining game ' + gameid + ': You have previously left this game. You cannot join this game again.' );
 				console.log('Stopping loop on room: ' + gameid);
+				RemoveQueue(gameid);
 				break;
 			case 29:	// currently in a room
 		        	console.log( '[' + code + '] Error joining game ' + gameid + ': You\'ll have to leave your current game to join this game. You will not be able to rejoin your current game.');
@@ -170,6 +173,7 @@ function HandleJoinError(gameid, count, code, msg)
 					if (msg.search("higher than the highest level you have completed") != -1)
 					{
 						console.log('Stopping loop on room: ' + gameid);
+						RemoveQueue(gameid);
 					}
 					else if (msg.search("maximum number of players") != -1)
 					{
@@ -178,6 +182,7 @@ function HandleJoinError(gameid, count, code, msg)
 							JoinGameLoop(gameid, count+1 );
 						} else {
 							console.log('Stopping loop on room: ' + gameid);
+							RemoveQueue(gameid);
 						}
 					}
 					else
@@ -220,6 +225,32 @@ function AutoJoinGame()
 	} else {
 		console.log('No room ID specified for auto join');
 	}
+}
+
+function AddQueue(gameid)
+{
+	var list = getPreference("roomlist", '');
+	var rooms = list.split(',');
+	rooms.unshift(gameid+'');
+	removeByValue(rooms,'';
+	setPreference("roomlist",rooms.toString());
+}
+
+function RemoveQueue(gameid)
+{
+	var list = getPreference("roomlist", '');
+	var rooms = list.split(',');
+	removeByValue(rooms,gameid);
+	setPreference("roomlist",rooms.toString());
+	if (rooms.length === 0)
+	{
+		ResetUI();
+	}
+}
+
+function QueueEmpty()
+{
+	return getPreference("roomlist", '').length === 0;
 }
 
 function CheckKey(e)
@@ -277,6 +308,17 @@ function addGlobalStyle(css)
 	style.type = 'text/css';
 	style.innerHTML = css;
 	head.appendChild(style);
+}
+
+function removeByValue(arr,val)
+{
+	for (var i = arr.length; i >= 0; --i)	// go backwards so we don't lose our place
+	{
+		if (arr[i] == val)
+		{
+			arr.splice(i,1);
+		}
+	}
 }
 
 function toggleFullRooms(event)
