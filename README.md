@@ -38,6 +38,8 @@ If you are already in a room, you will not be forced to leave your current room 
 
 New in version 3: Loop through multiple rooms at once (comma-separated list)!
 
+New in version 4: Loop through the rooms in your queue in separate threads instead of sequentially, for faster asynchronous searching.
+
 ## Usage
 Adds a text field and two buttons to the join game (lobby) page of the Steam minigame. Type the desired room number into the box and click "AutoJoin room." 
 
