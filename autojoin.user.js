@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	[geekahedron] Steam Game AutoJoin
 // @namespace	https://github.com/geekahedron/SteamGameAutoJoin/
-// @version	4.2
+// @version	4.3
 // @description	Auto-join script for 2015 Summer Steam Monster Minigame
 // @author	geekahedron
 // @match	*://steamcommunity.com/minigame
@@ -234,6 +234,7 @@ function AddQueue(gameid)
 	var rooms = list.split(',');
 	rooms.unshift(gameid+'');
 	removeByValue(rooms,'');
+	console.log(gameid + 'added to queue, current: ' + rooms)
 	setPreference("roomlist",rooms.toString());
 }
 
@@ -242,7 +243,7 @@ function RemoveQueue(gameid)
 	var list = getPreference("roomlist", '');
 	var rooms = list.split(',');
 	removeByValue(rooms,gameid);
-	console.log(rooms);
+	console.log(gameid + 'removed from queue, remaining: ' + rooms);
 	setPreference("roomlist",rooms.toString());
 	if (rooms.length === 0)
 	{
