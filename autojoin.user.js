@@ -234,7 +234,7 @@ function AddQueue(gameid)
 	var rooms = list.split(',');
 	rooms.unshift(gameid+'');
 	removeByValue(rooms,'');
-	console.log(gameid + 'added to queue, current: ' + rooms)
+	console.log(gameid + ' added to queue, current: ' + rooms)
 	setPreference("roomlist",rooms.toString());
 }
 
@@ -243,7 +243,7 @@ function RemoveQueue(gameid)
 	var list = getPreference("roomlist", '');
 	var rooms = list.split(',');
 	removeByValue(rooms,gameid);
-	console.log(gameid + 'removed from queue, remaining: ' + rooms);
+	console.log(gameid + ' removed from queue, remaining: ' + rooms);
 	setPreference("roomlist",rooms.toString());
 	if (rooms.length === 0)
 	{
